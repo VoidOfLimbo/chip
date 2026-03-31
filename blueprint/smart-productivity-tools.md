@@ -43,7 +43,7 @@ Extract structured text and data from uploaded documents (PDFs, scanned images, 
 
 ```
 uploads
-  id              uuid
+  id              ulid
   user_id         FK → users
   filename        string
   mime_type       string
@@ -52,7 +52,7 @@ uploads
   created_at / updated_at
 
 ocr_results
-  id              uuid
+  id              ulid
   upload_id       FK → uploads
   engine          string    (e.g. "tesseract", "google_vision", "aws_textract")
   raw_text        text
@@ -109,7 +109,7 @@ Perform common image operations on uploaded images: resize, crop, compress, anno
 
 ```
 image_processing_jobs
-  id              uuid
+  id              ulid
   upload_id       FK → uploads
   user_id         FK → users
   operations      json      (ordered list of operations with params)
@@ -145,25 +145,19 @@ Potential additions as the feature set grows:
 
 ---
 
-## Permissions & Abilities
+## Permissions
 
-| Ability Slug | Add-on? | Description |
-|---|---|---|
-| `ocr_parser` | Yes | Unlock full (persistent) OCR File Parser for tenant |
-| `image_processor` | Yes | Unlock full (persistent) Image Processor for tenant |
-| `productivity_suite` | Yes (bundle) | Unlocks all current Smart Productivity Tools |
+Smart Productivity Tools are Server Features. Access is controlled entirely by the Server owner via `server_feature_access` rules (see `blueprint/roles-permissions.md`).
 
-All Smart Productivity Tools are **Investor-only** for full use via add-on Abilities. Supporter users get ephemeral demo access without needing an Ability grant.
+| Permission | `super_owner` | `investor` | `free` |
+|---|---|---|---|
+| `tools.ocr` | ✅ | ✅ (Server Feature) | ❌ |
+| `tools.image_processor` | ✅ | ✅ (Server Feature) | ❌ |
+| `uploads.create` | ✅ | ✅ (Server Feature) | ❌ |
+| `uploads.read` | ✅ | ✅ (Server Feature) | ❌ |
+| `uploads.delete` | ✅ | ✅ (Server Feature) | ❌ |
 
-| Permission | `owner` | `free` | `supporter` | `investor` |
-|---|---|---|---|---|
-| `tools.ocr` (demo) | ✅ | ❌ | ✅ (ephemeral) | ✅ |
-| `tools.ocr` (full/persistent) | ✅ | ❌ | ❌ | ✅ (Ability: `ocr_parser`) |
-| `tools.image_processor` (demo) | ✅ | ❌ | ✅ (ephemeral) | ✅ |
-| `tools.image_processor` (full/persistent) | ✅ | ❌ | ❌ | ✅ (Ability: `image_processor`) |
-| `uploads.create` | ✅ | ❌ | ✅ (ephemeral) | ✅ (tenant) |
-| `uploads.read` | ✅ | ❌ | ❌ | ✅ (tenant) |
-| `uploads.delete` | ✅ | ❌ | ❌ | ✅ (tenant) |
+The Server owner subscribes `ocr_parser` and/or `image_processor` as Features to their Server, then grants access to specific members, groups, or supporters via access rules.
 
 ---
 

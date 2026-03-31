@@ -77,12 +77,21 @@ A user can hold different Server roles across different Servers simultaneously.
   - Purchasing additional Member Slots
   - Offsetting the Server's monthly feature subscription bill
 - Unspent credits automatically offset the next monthly bill.
-- **Refund policy**: 80% of original payment. Full refund details subject to legal review.
+- **Refund policy on boosts**: 80% refunded if requested within 7 days; no refund after. See `blueprint/payments-subscriptions.md`.
 
-### Member Slots (N)
-- A base value of N member slots is included in the Investor one-off payment.
-- N is a separately subscribable add-on, priced per increment (e.g. per 10 extra members).
-- Any Server member can contribute boost payments toward the credit pool, which the Server owner can invest in additional slots.
+### Donations
+- Any registered user can make a **one-off donation** of any amount to the Server creator.
+- Donations are voluntary — no platform entitlements attached.
+- Donation funds enter the Server's credit pool (same as a boost).
+- Donors choose: **display their name in the Server's Hall of Fame** (a placeable page component), or **remain anonymous**.
+- Donors can include an optional personal message shown in the Hall of Fame.
+
+### Supporter Subscriptions
+- Any registered user can take out a **recurring supporter subscription** to any Server.
+- No cap — a user can hold simultaneous subscriptions to multiple Servers; each is billed independently.
+- Available terms: monthly, 3-month, 6-month, or annual (Server owner chooses which to offer).
+- The platform sends renewal reminders at **7 days**, **3 days**, and **1 day** before each renewal and the same schedule before expiry.
+- **Refund policy on subscriptions**: 80% within 7 days of a billing date, no refund after; cancellation also terminates immediately within the window. EU/UK 14-day cancellation right is waived at signup via explicit consent checkbox.
 
 ### Features
 - Features are subscribable modules: Expense Planner, Life Planner, OCR File Parser, Image Processor, and more to come.
@@ -94,8 +103,11 @@ A user can hold different Server roles across different Servers simultaneously.
 
 ### Pages & Page Builder
 - The primary content unit in a Server is a **Page**.
-- Pages are built with a block-based page builder: flexible content blocks (text, image, 3D containers, etc.) composed by the Server owner.
-- Each Page has a visibility setting; each block within a page also has its own visibility.
+- Pages are built with a **drag-and-drop component builder** (GridStack-inspired): reusable components are placed on a 12-column canvas, resized, configured, and optionally bound to a live data source.
+- The page is a grid canvas — not a document editor. Text editors (Tiptap) are embedded only inside specific text-based components.
+- Each component type has a defined config schema and optional data source bindings (server stats, member list, expense data, Hall of Fame donors, etc.).
+- The Component Library holds platform-shipped components and Server-custom components defined by the Server owner.
+- Each Page has a visibility setting; each placed component also has its own visibility.
 - **Visibility levels**: `public`, `link` (requires OTP to view), `authenticated`, `server` (any Server member), `group` (specific Group), `private`.
 - Link-based sharing requires OTP verification (email or phone) to identify the viewer — no anonymous access.
 - All content access events, share token usage, and OTP attempts are logged for security and accountability.
@@ -116,9 +128,10 @@ A user can hold different Server roles across different Servers simultaneously.
 - **Server feature subscriptions**: monthly, per-feature price set by `super_owner`; billed to the Server owner.
 - **Member slot add-on**: separately subscribable, priced per increment.
 - **Supporter boost**: one-off payment to a specific Server; amount between £0 and the Server owner's set maximum.
-- **Supporter monthly subscription** (Limbo only path): monthly, sustained access; 14-day cancellation right waived.
+- **Supporter subscription**: recurring subscription to any Server; monthly / 3-month / 6-month / annual terms; no cap on simultaneous Servers; 14-day cancellation right waived at signup and every renewal; 7-day pre-renewal and pre-expiry warnings.
+- **Donation**: one-off any-amount gift to the Server creator; enters the Server credit pool; donor chooses public (Hall of Fame) or anonymous.
 - All Server-received payments enter the Server credit pool — no cash out.
-- Refund: 80% of original payment.
+- **Refund policy**: 80% of original payment if requested within 7 calendar days; no refund after 7 days. See `blueprint/legal.md` for jurisdiction compliance and T&C requirements.
 
 ### Development Environment
 - Local development via **Laravel Sail** (Docker) with PostgreSQL, Redis, pgAdmin, and Mailpit.
@@ -130,13 +143,16 @@ A user can hold different Server roles across different Servers simultaneously.
 
 ## Progress Tracker
 
+See `blueprint/progress.md` for the full phase-by-phase progress tracker.
+
 | Area | Status | Notes |
 |---|---|---|
+| Prerequisites & Setup Plan | Planning | See `blueprint/prerequisites.md` |
 | Account tiers & access | Planning | See `blueprint/access-tiers.md` |
 | Servers & Groups | Planning | See `blueprint/servers-groups.md` |
 | Pages & Page Builder | Planning | See `blueprint/pages-builder.md` |
 | Content Visibility & Access Logging | Planning | See `blueprint/content-visibility.md` |
-| Roles, Permissions & Abilities | Planning | See `blueprint/roles-permissions.md` |
+| Roles, Permissions & Features | Planning | See `blueprint/roles-permissions.md` |
 | Payments & Subscriptions | Planning | See `blueprint/payments-subscriptions.md` |
 | Development Setup | Planning | See `blueprint/development-setup.md` |
 | Expense Planner | Planning | See `blueprint/expense-planner.md` |

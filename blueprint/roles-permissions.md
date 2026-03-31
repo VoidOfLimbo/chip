@@ -45,21 +45,44 @@ Permissions are strings defined in code. They are not stored in the database. Co
 ### `super_owner`
 No permission checks apply. All Gates and Policies are bypassed unconditionally.
 
-### `investor`
+### `investor` (as `server_owner` on own Server)
 Inherits all `free` permissions, plus:
 
 **Server management (own Server only)**
 - `server.manage` — configure Server settings, visibility, preview duration
 - `server.pages.create` — create Pages
-- `server.pages.update` — edit Pages and blocks
-- `server.pages.delete` — soft-delete Pages and blocks
+- `server.pages.update` — edit Pages and components
+- `server.pages.delete` — soft-delete Pages and components
 - `server.pages.publish` — publish / unpublish Pages
-- `server.members.manage` — approve/reject join requests, invite members
+- `server.members.join.approve` — **approve or reject** public join requests (**server_owner only — never delegated to moderators**)
+- `server.members.invite` — send email or link invites
+- `server.members.suspend` — suspend or remove members
 - `server.groups.manage` — create, edit, delete Groups; manage Group membership
 - `server.moderators.manage` — appoint and remove moderators
 - `server.features.manage` — subscribe / unsubscribe Features to their Server
 - `server.credits.invest` — allocate Server credit pool
-- `server.access.configure` — set per-page, per-block, and per-feature access rules for members
+- `server.access.configure` — set per-page, per-component, and per-feature access rules for members
+- `server.components.manage` — define and manage custom Server components (v1: server_owner only)
+
+### `moderator` (Server role — granted by `server_owner`)
+Moderators are responsible for **content moderation and community management** within a Server. They cannot make access-control decisions (join approvals, feature subscriptions, credit investment).
+
+**What moderators can do:**
+- `server.members.invite` — send email or link invites
+- `server.members.suspend` — suspend or remove members who violate rules
+- `server.members.preview_extend` — approve weekly preview extension requests from users
+- `server.groups.members.manage` — add or remove users from existing Groups (cannot create or delete Groups)
+- `server.content.hide` — hide a page component that violates Server rules (`is_locked = true` on the instance)
+- `server.pages.view.all` — view all Pages regardless of visibility level (for moderation purposes)
+
+**What moderators cannot do (server_owner only):**
+- Approve or reject public join requests
+- Appoint or remove other moderators
+- Create, configure, or delete Pages
+- Subscribe or unsubscribe Features
+- Invest or allocate Server credits
+- Configure per-page or per-feature access rules
+- Change Server settings
 
 ### `free`
 - `server.join.request` — submit a public join request to a Server
@@ -68,7 +91,7 @@ Inherits all `free` permissions, plus:
 - `server.page.view` — view Pages the Server owner has granted access to
 - `server.feature.view` — access Features the Server owner has granted access to
 - `server.boost` — make a boost payment to a Server
-- `server.subscribe` — take out a monthly subscription to a Server
+- `server.subscribe` — take out a supporter subscription to a Server (any term)
 - `user.follow` — follow another user or Server
 
 ---
@@ -141,12 +164,51 @@ Request arrives
   -> Allow
 ```
 
-### Implementation Notes
-- Use Laravel **Gates** and **Policies** for platform-role permission checks.
-- Server role checks use a `ServerMember` query scoped to the current Server context.
-- Feature access checks use a `ServerFeatureAccess` query: does a rule exist for this user / their group / their server role?
-- Content visibility checks are evaluated in `PagePolicy` and `PageBlockPolicy`.
-- All denials are logged to `access_logs` (see `blueprint/content-visibility.md`).
+## Enforcement Architecture (Middleware + Policy)
+
+All authorization is enforced **server-side only**. Frontend UI guards (hidden buttons, disabled inputs) are purely UX — they are never relied upon for security.
+
+### Layer 1 — Middleware (fast-fail before controller)
+
+| Middleware | Applied to | What it checks |
+|---|---|---|
+| `EnsureServerMember` | All `/server/{server}/*` routes | User is an active member (`status = active`) of the route-bound Server |
+| `EnsureServerRole` | Role-gated routes (e.g. moderator-only) | User's `server_role` on the route-bound Server is at least the required level |
+
+- Middleware runs **before** the controller. Any request that fails the middleware check is aborted with `403 Forbidden` immediately — the controller never runs.
+- This stops direct API requests and frontend exploits at the application boundary.
+- `EnsureServerMember` is registered in `bootstrap/app.php` with an alias and applied to the `server` route group.
+- `EnsureServerRole` is parametric: `->middleware('server.role:moderator')` restricts a route to moderator or above.
+
+### Layer 2 — Policies (per-action fine-grained authorization in controllers)
+
+| Policy | Resource | Key methods |
+|---|---|---|
+| `ServerPolicy` | `Server` | `view`, `manage`, `approveJoin`, `inviteMembers`, `suspendMember`, `manageFeatures`, `investCredits`, `configureAccess`, `manageComponents` |
+| `PagePolicy` | `Page` | `view`, `create`, `update`, `publish`, `delete` |
+| `PageComponentPolicy` | `PageComponent` | `view`, `update`, `delete`, `hide` |
+| `ModerationPolicy` | `Server` | `moderate`, `extendPreview`, `manageGroupMembers` |
+
+- Policies live in `app/Policies/`. Registered automatically by Laravel's convention.
+- Every controller action calls `$this->authorize()` or `Gate::authorize()` — even if middleware already passed.
+- The `super_owner` check is in `Gate::before()` in `AppServiceProvider` — it short-circuits all policy checks unconditionally.
+- `ServerPolicy@approveJoin` checks `server_role === server_owner` explicitly — no moderator can pass this check.
+
+### Why Both Layers?
+
+- **Middleware** prevents unauthenticated / non-member requests from hitting business logic entirely.
+- **Policies** enforce role-level granularity inside valid requests — e.g. a moderator hitting an `approveJoin` action still gets `403` even though they passed `EnsureServerMember`.
+- Together they make it impossible to exploit the frontend (e.g. manually calling a route the UI hides) or to escalate permissions through crafted requests.
+
+### Feature Access Rule Resolution (Most-Specific-Wins)
+When evaluating whether a user can access a Feature on a Server, rules in `server_feature_access` are resolved with **most-specific-wins**:
+
+1. Look for a `user`-scoped rule for the requesting user on this Server + Feature. If found, that rule is authoritative — stop.
+2. Look for a `group`-scoped rule covering any Group the user belongs to on this Server + Feature. If found, apply that rule.
+3. Look for a `member`-scoped rule (applies to all members) or `supporter`-scoped rule (applies to all supporters).
+4. If no rule matches, access is denied by default.
+
+This means a user-level explicit grant always overrides a group-level denial, and vice versa. The Server owner's most targeted decision about a specific person is always authoritative.
 
 ---
 
@@ -162,6 +224,4 @@ Request arrives
 ---
 
 ## Open Questions
-- Should server role checks be middleware-level (e.g. `EnsureServerMember` middleware) or policy-level?
-- Should `server_feature_access` rules stack (user rule + group rule both apply) or is it most-specific-wins?
 - Should the `super_owner` be able to delegate a second super-admin without full `super_owner` seeding?

@@ -54,9 +54,9 @@ servers
 
 | Path | How it works |
 |---|---|
-| **Public join request** | `is_public = true` on the Server; any registered user submits a request; Server owner or moderator approves |
+| **Public join request** | `is_public = true` on the Server; any registered user submits a request; **Server owner approves or rejects only** |
 | **Email invite** | Server owner or moderator sends an email invite; recipient registers or logs in and accepts |
-| **Link invite** | Owner or moderator generates an invite link; recipient verifies via OTP and joins |
+| **Link invite** | Server owner or moderator generates an invite link; recipient verifies via OTP and joins |
 
 All invite links require OTP verification before the join is recorded — no anonymous joins. See `blueprint/content-visibility.md`.
 
@@ -66,7 +66,7 @@ All invite links require OTP verification before the join is recorded — no ano
 - Duration is set by the Server owner via `preview_duration`. Default TBD, configured by `super_owner`.
 - During the preview, the user can see Pages the Server owner marks as preview-accessible (`preview_visible = true` on the page).
 - After expiry, all Server content is hidden until they formally join.
-- A user can request a **1-week extension once per week** — Server owner or moderator approves.
+- A user can request a **1-week extension once per week** — Server owner or moderator approves (`server.members.preview_extend` permission).
 
 ### Member Data Model
 
@@ -131,14 +131,14 @@ Unspent credits automatically offset the next monthly bill.
 ### Credit Pool Rules
 
 - Credits are locked to the Server — no cash out.
-- **Refund**: 80% of original payment. Full legal details TBD.
+- **Refund policy on boosts and donations**: 80% of the original payment refunded if requested within 7 calendar days; no refund after 7 days. Credits already invested from the pool before a refund is requested cannot be reversed. See `blueprint/payments-subscriptions.md` for full details.
 - Credit allocation is recorded in `server_credit_transactions`.
 
 ```
 server_credit_transactions
   id              ulid
   server_id       FK → servers
-  type            enum: boost_in | feature_invest | slot_invest | bill_offset | refund
+  type            enum: boost_in | donation_in | feature_invest | slot_invest | bill_offset
   amount_pence    integer
   description     string nullable
   created_by      FK → users nullable
@@ -214,5 +214,3 @@ Server (type: standard, one per investor)
 - What are the exact boost tier thresholds and what each tier unlocks? (Configured by `super_owner` — values TBD)
 - What is the base member cap for a new standard Server?
 - What is the default preview duration, and can the Server owner customise it?
-- Can a moderator approve join requests, or only `server_owner`?
-- What happens to a Server if the Investor's monthly bill is unpaid — immediate freeze or grace period?

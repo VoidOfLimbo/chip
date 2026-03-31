@@ -36,21 +36,25 @@ Chip has three platform-level account tiers. Tiers are permanent and platform-wi
 - Browse and view public pages on any Server.
 - **Request to join** a Server (if the Server has `is_public = true`) or accept an invite (email or link with OTP).
 - Receive a **time-limited preview** of a Server upon first visit. During the preview they can see pages the Server owner marks as preview-accessible.
-  - Before or after expiry: can request a **1-week access extension once per week** — approved by Server owner or moderator.
+  - Before or after expiry: can request a **1-week access extension once per week** — approved by Server owner or moderator (`server.members.preview_extend` permission).
 - **Request access to demo features** on a Server — the Server owner approves per user at their discretion.
 - **Follow** other users or Servers (unidirectional).
 - **Boost a Server** (one-off payment) → gains `supporter` server role on that Server and access to whatever the Server owner grants supporters.
-- **Subscribe monthly** to a Server → sustained supporter access; see subscription rules below.
+- **Donate** to a Server creator (any amount, anonymous or public in Hall of Fame).
+- **Subscribe** to any Server for sustained supporter access (see Supporter Subscriptions below).
 
 ### Free users cannot
 - Create a Server.
 - Publish Pages or manage any Server content.
 
-### Monthly Subscription (Limbo path)
-Free users can take out a monthly subscription to the Owner's Server (Limbo) for sustained access:
-- At sign-up and on **every auto-renewal**, the user must actively waive their 14-day EU/UK statutory cancellation right.
-- This gives them sustained `supporter` access to Limbo for whatever the Owner grants supporters.
+### Supporter Subscriptions
+Free users can take out a recurring supporter subscription to **any Server** (including Limbo). There is no cap on how many Servers a user can subscribe to simultaneously:
+- Each subscription is billed independently.
+- Available terms: monthly, 3-month, 6-month, or annual (terms offered are set per Server by the Server owner).
+- At signup and on **every auto-renewal**, the user must actively waive their 14-day EU/UK statutory cancellation right.
+- The platform sends warnings during the **final 7 days** before each renewal date and before expiry.
 - This does **not** upgrade their platform role — they remain `free`.
+- Supporter access on each Server is retained until the end of the paid period if they cancel.
 
 ### Upgrade Path
 - Pay the **Investor one-off fee** → gains `investor` platform role → can create their own Server.
@@ -76,7 +80,7 @@ Free users can take out a monthly subscription to the Owner's Server (Limbo) for
 - **Invest Server credits** toward features, member slots, or monthly bill offset.
 
 ### Server Monthly Cost
-The Investor pays monthly for Features subscribed to their Server. If their credit pool has a balance, it offsets the bill automatically. If the bill cannot be covered: TBD — freeze or grace period (see `blueprint/servers-groups.md` open questions).
+The Investor pays monthly for Features subscribed to their Server. If their credit pool has a balance, it offsets the bill automatically. If the bill cannot be covered: a **7-day grace period** applies — the Server's features are suspended after 7 days of non-payment, but the Server itself (and its Pages) remains visible.
 
 ### What Investors Cannot Do
 - Create more than one Server.
@@ -120,7 +124,8 @@ The Investor pays monthly for Features subscribed to their Server. If their cred
 | Request weekly preview extension | ❌ | ✅ | ✅ | ✅ |
 | Request demo feature access | ❌ | ✅ | ✅ | ✅ |
 | Boost a Server (one-off) | ❌ | ✅ | ✅ | ✅ |
-| Monthly Server subscription | ❌ | ✅ (Limbo only) | ✅ | ✅ |
+| Donate to a Server creator | ❌ | ✅ | ✅ | ✅ |
+| Supporter subscription (any Server, no cap) | ❌ | ✅ | ✅ | ✅ |
 | Follow users / Servers | ❌ | ✅ | ✅ | ✅ |
 | Create a Server | ❌ | ❌ | ✅ (one) | ✅ (unlimited) |
 | Subscribe Features to Server | ❌ | ❌ | ✅ | ✅ |
@@ -133,5 +138,3 @@ The Investor pays monthly for Features subscribed to their Server. If their cred
 ## Open Questions
 - What is the exact Investor one-off payment amount? (Configured by `super_owner` — value TBD)
 - What is the default Server preview duration?
-- When the Investor's monthly Server bill cannot be paid, is it an immediate freeze or a grace period?
-- Can a `free` user hold monthly subscriptions to multiple Servers simultaneously, or only one?

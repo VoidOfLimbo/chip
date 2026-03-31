@@ -1,7 +1,7 @@
 # Content Visibility & Access Logging
 
 ## Overview
-All content in Chip — Pages, Blocks, and future content types — carries a `visibility` setting that controls who can see it. Link-based sharing requires OTP verification to identify the viewer. All access events are logged for security and accountability.
+All content in Chip — Pages, Page Components, and future content types — carries a `visibility` setting that controls who can see it. Link-based sharing requires OTP verification to identify the viewer. All access events are logged for security and accountability.
 
 ---
 
@@ -16,7 +16,7 @@ All content in Chip — Pages, Blocks, and future content types — carries a `v
 | `group` | Members of a specific Group within the Server | No |
 | `private` | Server owner and moderators only | No |
 
-All routes except `public` content are excluded from crawler indexing via `robots.txt`. A Block's visibility cannot be less restrictive than its parent Page's visibility (see `blueprint/pages-builder.md`).
+All routes except `public` content are excluded from crawler indexing via `robots.txt`. A Page Component's visibility cannot be less restrictive than its parent Page's visibility (see `blueprint/pages-builder.md`).
 
 ---
 
@@ -40,7 +40,7 @@ Each OTP attempt (success or failure) is individually logged. Expired or exhaust
 ```
 share_tokens
   id              ulid
-  shareable_type  string            (e.g. "page", "page_block")
+  shareable_type  string            (e.g. "page", "page_component")
   shareable_id    ulid
   type            enum: link | otp
   token           string unique
@@ -65,7 +65,7 @@ access_logs
   user_id           FK → users nullable     (null for unauthenticated or pre-OTP attempts)
   contact_hint      string nullable         (hashed email/phone from OTP flow — never plain text)
   event_type        enum (see table below)
-  target_type       string nullable         (e.g. "page", "page_block", "server")
+  target_type       string nullable         (e.g. "page", "page_component", "server")
   target_id         ulid nullable
   share_token_id    FK → share_tokens nullable
   ip_address        string                  (masked — see Privacy section)
@@ -87,7 +87,7 @@ access_logs
 | `token_exhausted` | Share token accessed after `max_uses` reached |
 | `access_denied` | Content access refused (insufficient role or visibility) |
 | `join_requested` | User submits a public join request to a Server |
-| `join_approved` | Join request approved by Server owner or moderator |
+| `join_approved` | Join request approved by Server owner only |
 | `invite_accepted` | User accepts an email or link invite |
 | `preview_started` | User begins a time-limited Server preview |
 | `preview_expired` | User's preview window expires |

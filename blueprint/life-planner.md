@@ -24,7 +24,7 @@ The primary unit. Represents a scheduled task, a goal, or a recurring commitment
 
 | Field | Type | Description |
 |---|---|---|
-| `id` | uuid | |
+| `id` | ulid | |
 | `user_id` | FK → users | Owner |
 | `server_id` | FK → servers | |
 | `title` | string | |
@@ -46,7 +46,7 @@ Reusable custom tags that supplement the built-in contexts.
 
 | Field | Type | Description |
 |---|---|---|
-| `id` | uuid | |
+| `id` | ulid | |
 | `user_id` | FK → users | |
 | `name` | string | e.g. "Side Project", "Reading", "Fitness" |
 | `colour` | string | Hex |
@@ -86,7 +86,7 @@ Reusable custom tags that supplement the built-in contexts.
 
 ```
 plan_subtasks
-  id          uuid
+  id          ulid
   plan_id     FK → plans
   title       string
   is_done     boolean
@@ -137,9 +137,9 @@ plan_subtasks
 | Unified list / all contexts | Investor, Super Owner |
 | Per-context filter view | Investor, Super Owner |
 | Custom tag view | Investor, Super Owner |
-| Calendar | Supporter, Investor |
-| Timeline / Gantt | Investor (Ability) |
-| Team-shared plans | Investor (Ability) |
+| Calendar | Investor, Super Owner |
+| Timeline / Gantt | Investor (Server Feature) |
+| Team-shared plans | Investor (Server Feature) |
 
 ---
 
@@ -148,5 +148,4 @@ plan_subtasks
 - Is drag-and-drop reordering needed for the plan list / calendar?
 - Should Life Goals support progress percentage (manual or derived from sub-tasks)?
 - Notifications / reminders for upcoming or overdue plans — email, in-app, or both?
-- Should Free users see a demo/preview of the planner, or just an upsell screen?
-- Are work plans ever collaborative for Supporter orgs, or only for Investors?
+- Should Free users see a preview/upsell for the planner?

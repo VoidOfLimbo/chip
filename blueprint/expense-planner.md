@@ -24,7 +24,7 @@ A single recorded cost. Can be one-off or recurring.
 
 | Field | Type | Description |
 |---|---|---|
-| `id` | uuid | |
+| `id` | ulid | |
 | `user_id` | FK → users | Owner |
 | `server_id` | FK → servers | Scoped to Server |
 | `title` | string | e.g. "Monthly Rent" |
@@ -42,7 +42,7 @@ User-defined or system-default categories (e.g. Housing, Utilities, Transport, F
 
 | Field | Type | Description |
 |---|---|---|
-| `id` | uuid | |
+| `id` | ulid | |
 | `user_id` | FK → users (nullable for system defaults) | |
 | `name` | string | |
 | `colour` | string | Hex colour for UI |
@@ -74,7 +74,7 @@ Recurring expenses use a simple recurrence rule stored as JSON to describe the r
 ### Expense Occurrences Table
 ```
 expense_occurrences
-  id             uuid
+  id             ulid
   expense_id     FK → expenses
   due_date       date
   amount         integer     (snapshot; can differ if user overrides)
@@ -138,8 +138,7 @@ expense_occurrences
 ---
 
 ## Open Questions
-- Should Free users see real (anonymised) community expense data, or a purely static demo?
 - Multi-currency: should the overview convert to a base currency, or show per-currency totals?
-- Should team members within an Investor org be able to contribute to shared expenses, or only the owner?
+- Should Server Group members be able to contribute to shared expenses, or only the Server owner?
 - Is CSV export sufficient for MVP, or is PDF/Excel needed?
 - Notification / reminder for upcoming due expenses — email, in-app, or both?

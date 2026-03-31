@@ -285,6 +285,5 @@ Pest feature tests for the payment flow should mock Stripe API responses (using 
 ---
 
 ## Open Questions
-- Should Redis be included from day one, or use `database` queue driver initially?
 - Will the Stripe CLI be installed locally by each developer, or containerised?
 - Do we need a `.env.testing` with separate Stripe mocks for CI?
