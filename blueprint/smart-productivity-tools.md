@@ -11,12 +11,9 @@ Smart Productivity Tools is a collection of utility features that augment the co
 |---|---|
 | Public | None |
 | Free | None |
-| Supporter | **Limited demo** — can try each tool with an uploaded or sample file; results are ephemeral (not stored) |
-| Investor | **Full access** via Ability/subscription add-ons within their Tenant space; results are persisted |
+| Investor | **Full access** within their own Server; results are persisted |
 
-Smart Productivity Tools are **special features**. Supporter users can experience them as ephemeral demos; Investor users use them as real persistent tools within their tenant.
-
-All Smart Productivity Tools are gated behind Investor-only **Abilities**. Each tool may be a separate add-on or bundled together as a "Productivity Suite" add-on — TBD.
+Smart Productivity Tools are Server Features. Each tool is enabled per-Server by the Server owner via their Feature subscription. Access to results is scoped to the Server where the tool is enabled.
 
 ---
 

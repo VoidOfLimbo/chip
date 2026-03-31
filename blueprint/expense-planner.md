@@ -10,11 +10,10 @@ The Expense Planner lets users track, categorise, and plan their personal or org
 | Tier | Access |
 |---|---|
 | Public | None |
-| Free | None (Expense Planner is a special feature, not part of the portfolio view) |
-| Supporter | **Interactive demo** — explore using sandboxed sample data; changes are ephemeral (not persisted long-term) |
-| Investor | **Full access** within their Tenant Organisation — real, persistent expense data scoped to their tenant |
+| Free | None |
+| Investor | **Full access** within their own Server — real, persistent expense data |
 
-The Expense Planner is a **special feature**. Supporter users can experience it as a demo; Investor users use it as a genuine productivity tool in their own tenant space.
+The Expense Planner is a Server Feature. It is enabled per-Server by the Server owner via their Feature subscription.
 
 ---
 
@@ -27,7 +26,7 @@ A single recorded cost. Can be one-off or recurring.
 |---|---|---|
 | `id` | uuid | |
 | `user_id` | FK → users | Owner |
-| `organisation_id` | FK → organisations | Scoped to org (for shared expenses) |
+| `server_id` | FK → servers | Scoped to Server |
 | `title` | string | e.g. "Monthly Rent" |
 | `amount` | integer | In smallest currency unit (pence/cents) |
 | `currency` | string | ISO 4217, default from user settings |
@@ -109,7 +108,7 @@ expense_occurrences
 - Monthly/weekly calendar showing when expenses are due.
 - Colour-coded by category.
 
-### Reports (Supporter / Investor)
+### Reports
 - Monthly spending breakdown by category (bar/pie chart).
 - Year-over-year comparison.
 - Export to CSV.
@@ -118,16 +117,16 @@ expense_occurrences
 
 ## Permissions
 
-| Permission | `owner` | `free` | `supporter` | `investor` |
-|---|---|---|---|---|
-| `expenses.read` | ✅ | ❌ | ✅ (demo/sandboxed) | ✅ (tenant) |
-| `expenses.create` | ✅ | ❌ | ✅ (demo/sandboxed) | ✅ (tenant) |
-| `expenses.update` | ✅ | ❌ | ✅ (demo/sandboxed) | ✅ (tenant) |
-| `expenses.delete` | ✅ | ❌ | ✅ (demo/sandboxed) | ✅ (tenant) |
-| `expenses.org_shared` | ✅ | ❌ | ❌ | ✅ (Ability) |
-| `expenses.export` | ✅ | ❌ | ❌ | ✅ (tenant) |
+| Permission | `super_owner` | `investor` | `free` |
+|---|---|---|---|
+| `expenses.read` | ✅ | ✅ (own Server) | ❌ |
+| `expenses.create` | ✅ | ✅ (own Server) | ❌ |
+| `expenses.update` | ✅ | ✅ (own Server) | ❌ |
+| `expenses.delete` | ✅ | ✅ (own Server) | ❌ |
+| `expenses.server_shared` | ✅ | ✅ (Server Feature) | ❌ |
+| `expenses.export` | ✅ | ✅ (own Server) | ❌ |
 
-`expenses.org_shared` — allows creating and viewing expenses shared across an Organisation. Gated behind an Investor Ability/add-on.
+`expenses.server_shared` — allows creating and viewing expenses shared within a Server or Group. Gated behind the Server Feature subscription.
 
 ---
 

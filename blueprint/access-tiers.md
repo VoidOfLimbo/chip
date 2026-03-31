@@ -1,13 +1,13 @@
 # Access Tiers
 
 ## Overview
-Chip is the owner's personal portfolio and productivity platform. Access tiers control what different visitors and paying users can see and do. The model is:
+Chip has three platform-level account tiers. Tiers are permanent and platform-wide. Server-level roles (`server_owner`, `moderator`, `supporter`, `member`) are separate and described in `blueprint/servers-groups.md`.
 
-- **Free** — browse the owner's public profile and any tenant's public profile (CV/portfolio)
-- **Supporter** — experience interactive demos of the app's special features
-- **Investor** — become a full tenant with their own dedicated space
-
-Every request passes through a gate that evaluates the user's tier and, for Investors, their tenancy context.
+| Tier | How gained | Platform role |
+|---|---|---|
+| Free | Registration (no cost) | `free` |
+| Investor | One-off payment to platform | `investor` |
+| Super Owner | Seeded at install | `super_owner` |
 
 ---
 
@@ -15,12 +15,11 @@ Every request passes through a gate that evaluates the user's tier and, for Inve
 
 | Attribute | Value |
 |---|---|
-| Route | `/` (landing page) |
 | Auth required | No |
-| Access | Landing page only |
+| Access | Public pages of any Server; landing page |
 
-- Any visitor can view the landing page.
-- The landing page presents the owner's elevator pitch and the three account options with feature comparison.
+- Any visitor sees the landing page and any Server content with `public` visibility.
+- Public pages are crawler-indexed.
 - All other routes redirect unauthenticated visitors to the landing/login page.
 
 ---
@@ -30,57 +29,31 @@ Every request passes through a gate that evaluates the user's tier and, for Inve
 | Attribute | Value |
 |---|---|
 | Sign-up cost | Free |
-| Billing | None |
-| Organisation | Public Organisation (read-only member) |
-| Role | `free` |
-| Access level | Read-only portfolio/CV view — owner and all tenant public spaces |
+| Billing | None (unless they choose to boost a Server) |
+| Platform role | `free` |
 
-### What Free Users See
-The owner's public profile and any Investor tenant's public profile — the same information each party chooses to make public:
-- Bio, skills, experience, and education (CV-style)
-- Showcase projects and work samples
-- Published blog posts or articles (if enabled by the owner/tenant)
-- Contact / social links
+### What Free Users Can Do
+- Browse and view public pages on any Server.
+- **Request to join** a Server (if the Server has `is_public = true`) or accept an invite (email or link with OTP).
+- Receive a **time-limited preview** of a Server upon first visit. During the preview they can see pages the Server owner marks as preview-accessible.
+  - Before or after expiry: can request a **1-week access extension once per week** — approved by Server owner or moderator.
+- **Request access to demo features** on a Server — the Server owner approves per user at their discretion.
+- **Follow** other users or Servers (unidirectional).
+- **Boost a Server** (one-off payment) → gains `supporter` server role on that Server and access to whatever the Server owner grants supporters.
+- **Subscribe monthly** to a Server → sustained supporter access; see subscription rules below.
 
-This is analogous to browsing LinkedIn profiles. Free users cannot interact with any tools.
+### Free users cannot
+- Create a Server.
+- Publish Pages or manage any Server content.
 
-### Restrictions
-- No access to special features (Expense Planner, Life Planner, Smart Tools).
-- No demo access.
-- No persistent workspace of their own.
-- Cannot name an Organisation or manage anything.
-
-### Upgrade Path
-- Upgrade to Supporter (one-off payment) for demo access.
-- Upgrade directly to Investor (monthly subscription) to become a tenant.
-
----
-
-## Supporter Account
-
-| Attribute | Value |
-|---|---|
-| Sign-up cost | One-off payment (amount TBD) |
-| Billing | None recurring |
-| Organisation | Their own named **Supporter Organisation** (created at registration or on upgrade from Free) |
-| Role | `supporter` |
-| Access level | Free content + interactive demos of special features |
-
-### What Supporters Can Do
-- Everything a Free user can see.
-- Access **interactive demos** of all special features:
-  - **Expense Planner demo** — explore the feature using sandboxed sample data. Changes do not persist between sessions (or persist in a sandboxed demo workspace, TBD).
-  - **Life Planner demo** — explore task and goal tracking with sample plans.
-  - **Smart Productivity Tools demo** — upload a file and try OCR/image processing; results are ephemeral.
-- The demo experience is intentionally limited — it showcases the value without granting a full tenant workspace.
-
-### Restrictions
-- No persistent tenant space — demo data is sandboxed and ephemeral.
-- Supporter Organisation is demo-scoped only: no member invites, no team management.
-- Cannot unlock Investor Abilities.
+### Monthly Subscription (Limbo path)
+Free users can take out a monthly subscription to the Owner's Server (Limbo) for sustained access:
+- At sign-up and on **every auto-renewal**, the user must actively waive their 14-day EU/UK statutory cancellation right.
+- This gives them sustained `supporter` access to Limbo for whatever the Owner grants supporters.
+- This does **not** upgrade their platform role — they remain `free`.
 
 ### Upgrade Path
-- Upgrade to Investor to get a full tenant space and persistent data.
+- Pay the **Investor one-off fee** → gains `investor` platform role → can create their own Server.
 
 ---
 
@@ -88,71 +61,77 @@ This is analogous to browsing LinkedIn profiles. Free users cannot interact with
 
 | Attribute | Value |
 |---|---|
-| Sign-up cost | Monthly subscription (feature add-on driven pricing) |
-| Billing | Monthly, based on chosen add-ons |
-| Organisation | Their own named **Tenant Organisation** |
-| Role | `investor` |
-| Access level | Full tenant — own space, own public section, own demo section, full tools |
+| How gained | One-off payment (fixed amount set by `super_owner` in platform config) |
+| Billing | Monthly: sum of Features subscribed to their Server. No features = no monthly cost. |
+| Platform role | `investor` |
 
-### What Investors Get
-An Investor becomes a **tenant** of the platform. Their Tenant Organisation is a self-contained space that mirrors the structure of the owner's platform:
+### What Investors Can Do
+- Everything a Free user can do.
+- **Create one Server** — names it, configures it, builds Pages.
+- **Subscribe Features** to their Server (Expense Planner, Life Planner, Smart Tools, etc.) — each adds to the Server's monthly cost.
+- **Subscribe Member Slot add-ons** to increase their Server's member cap.
+- **Control all access** on their Server: which pages and features are visible to free members, supporters, specific Groups.
+- **Appoint moderators** from their supporter base.
+- **Set boost amounts** for each Context (the maximum a supporter can pay per feature).
+- **Invest Server credits** toward features, member slots, or monthly bill offset.
 
-#### Their Own Public Section (mirrors Free tier)
-- Investors can publish their own public profile within their tenant space.
-- Visitors to the Investor's tenant space (their own URL/slug) can browse the Investor's profile for free, just as Free users browse the owner's profile.
+### Server Monthly Cost
+The Investor pays monthly for Features subscribed to their Server. If their credit pool has a balance, it offsets the bill automatically. If the bill cannot be covered: TBD — freeze or grace period (see `blueprint/servers-groups.md` open questions).
 
-#### Their Own Demo Section (mirrors Supporter tier)
-- Investors can expose interactive demos of their tenant's tools to their own Supporter-tier visitors.
-- This is effectively a white-label demo environment scoped to the Investor's tenant.
+### What Investors Cannot Do
+- Create more than one Server.
+- Cash out Server credit pool funds.
 
-#### Full Special Feature Access
-- **Expense Planner** — full access with persistent, real data scoped to their Tenant Organisation.
-- **Life Planner** — full access; team-shared plans available as an add-on.
-- **Smart Productivity Tools** — full access to OCR parser, image processor, etc. via add-on Abilities.
+---
 
-#### Team Management
-- Investor can create and manage Teams within their Tenant Organisation.
-- Teams scope access to plans, expenses, and shared content within the tenant.
+## Super Owner
 
-### Premium Feature Add-ons (Abilities)
-- Investor selects add-ons at sign-up or from billing settings.
-- Each add-on unlocks one or more **Abilities** and increases the monthly cost.
-- Removing an add-on revokes associated Abilities at the next billing cycle.
-- See `blueprint/roles-permissions.md` for the full Ability model.
+| Attribute | Value |
+|---|---|
+| How gained | Seeded at install |
+| Billing | None |
+| Platform role | `super_owner` |
+
+### What the Super Owner Can Do
+- Everything an Investor can do, with no limits.
+- Unlimited Servers at no cost.
+- Define platform-wide Feature prices, Member Slot prices, boost tier thresholds, and all platform config values.
+- Suspend, modify, or manage any user, Server, or content on the platform.
+- Bypass all permission gates — no policy or gate check applies.
+
+### Seed Data
+| Field | Value |
+|---|---|
+| User name | Void |
+| User email | bipin.paneru.9@gmail.com |
+| Platform role | `super_owner` |
+| Server | Limbo (type: `owner`) |
 
 ---
 
 ## Access Matrix Summary
 
-| Feature | Public | Free | Supporter | Investor |
+| Capability | Public | Free | Investor | Super Owner |
 |---|---|---|---|---|
-| Landing page | ✅ | ✅ | ✅ | ✅ |
-| Owner's public portfolio/CV | ❌ | ✅ | ✅ | ✅ |
-| Owner's published content | ❌ | ✅ | ✅ | ✅ |
-| Tenant public portfolio/CV | ❌ | ✅ | ✅ | ✅ |
-| Expense Planner (sandboxed demo) | ❌ | ❌ | ✅ | ✅ |
-| Expense Planner (full — tenant) | ❌ | ❌ | ❌ | ✅ |
-| Expense Planner (org-shared — tenant) | ❌ | ❌ | ❌ | ✅ (Ability) |
-| Life Planner (sandboxed demo) | ❌ | ❌ | ✅ | ✅ |
-| Life Planner (full — tenant) | ❌ | ❌ | ❌ | ✅ |
-| Life Planner (team-shared / timeline) | ❌ | ❌ | ❌ | ✅ (Ability) |
-| OCR File Parser (demo, ephemeral) | ❌ | ❌ | ✅ | ✅ |
-| OCR File Parser (full — tenant) | ❌ | ❌ | ❌ | ✅ (Ability) |
-| Image Processor (demo, ephemeral) | ❌ | ❌ | ✅ | ✅ |
-| Image Processor (full — tenant) | ❌ | ❌ | ❌ | ✅ (Ability) |
-| Own public portfolio section | ❌ | ❌ | ❌ | ✅ (tenant) |
-| Own demo section for their visitors | ❌ | ❌ | ❌ | ✅ (tenant) |
-| Named Tenant Organisation | ❌ | ❌ | ❌ | ✅ |
-| Team management | ❌ | ❌ | ❌ | ✅ |
-| Premium Abilities (add-ons) | ❌ | ❌ | ❌ | ✅ |
+| View public Server pages | ✅ | ✅ | ✅ | ✅ |
+| Register / log in | — | ✅ | ✅ | ✅ |
+| Join a Server | ❌ | ✅ | ✅ | ✅ |
+| Time-limited Server preview | ❌ | ✅ | ✅ | ✅ |
+| Request weekly preview extension | ❌ | ✅ | ✅ | ✅ |
+| Request demo feature access | ❌ | ✅ | ✅ | ✅ |
+| Boost a Server (one-off) | ❌ | ✅ | ✅ | ✅ |
+| Monthly Server subscription | ❌ | ✅ (Limbo only) | ✅ | ✅ |
+| Follow users / Servers | ❌ | ✅ | ✅ | ✅ |
+| Create a Server | ❌ | ❌ | ✅ (one) | ✅ (unlimited) |
+| Subscribe Features to Server | ❌ | ❌ | ✅ | ✅ |
+| Build Pages | ❌ | ❌ | ✅ (own Server) | ✅ |
+| Appoint moderators | ❌ | ❌ | ✅ (own Server) | ✅ |
+| Platform-wide config | ❌ | ❌ | ❌ | ✅ |
 
 ---
 
 ## Open Questions
-- Does Supporter demo data persist between sessions (sandboxed workspace) or is it fully reset each session? No
-- Can a Supporter upgrade to Investor and have their demo workspace migrated to a real tenant space? Yes
-- What is the Supporter one-off payment amount? 6.9 GBP
-- What is the pricing model for Investor subscriptions and add-ons? TBD, but likely a base fee + incremental cost per add-on.
-- What happens when an Investor's subscription lapses — immediate downgrade to Supporter or a grace period? Investor retains access until the end of the billing cycle, then subscription becomes inactive. There will be multiple reminders and a clear downgrade path that may result in data loss or data will be preserved if it stays just inactive.
-- Can an Investor's tenant space be accessed via a custom subdomain or URL slug (e.g. `chip.app/org-ulid/dashboard`)? Yes, likely a URL slug (e.g. `chip.app/org-ulid/dashboard`) to avoid DNS complications. 
-- Do Investor tenants share the same app URL structure, or is routing per-tenant? Shared URL structure with tenant context determined by URL slug.
+- What is the exact Investor one-off payment amount? (Configured by `super_owner` — value TBD)
+- What is the default Server preview duration?
+- When the Investor's monthly Server bill cannot be paid, is it an immediate freeze or a grace period?
+- Can a `free` user hold monthly subscriptions to multiple Servers simultaneously, or only one?

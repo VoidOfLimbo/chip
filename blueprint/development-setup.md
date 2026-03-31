@@ -59,7 +59,7 @@ All tables use **ULID** as the primary key type instead of auto-incrementing int
 ```php
 // Migration example
 $table->ulid('id')->primary();
-$table->foreignUlid('organisation_id')->constrained();
+$table->foreignUlid('server_id')->constrained();
 
 // Model example
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -144,8 +144,8 @@ stripe listen --forward-to http://localhost/stripe/webhook
 | Send alert email | System or admin-triggered alert |
 | Send newsletter email | Owner-triggered broadcast |
 | Process Stripe webhook | Stripe event received |
-| Grant / revoke Abilities | Subscription change |
-| Sandbox demo reset | Supporter session teardown (TBD) |
+| Grant / revoke Feature access | Server feature subscription change |
+| Process boost payment | Boost payment completed |
 
 ---
 
@@ -158,10 +158,10 @@ stripe listen --forward-to http://localhost/stripe/webhook
 
 | Task | Frequency | Purpose |
 |---|---|---|
-| Revoke expired Abilities | Daily | Remove subscription-linked Abilities past `expires_at` |
+| Revoke expired Feature access | Daily | Remove feature access past subscription period end |
 | Subscription lapse check | Daily | Flag Investors whose subscription is past due |
 | Failed job pruning | Weekly | Clear old failed job records |
-| Demo sandbox reset | On demand / session end | Clear ephemeral Supporter demo data (TBD) |
+| Apply credits to monthly bill | Monthly | Auto-offset Server feature subscription with credit balance |
 
 ---
 
@@ -176,7 +176,7 @@ All email sent by the application is captured by Mailpit during development. No 
 | Email verification | Registration | Link arrives, clicks through, account verified |
 | Password reset | Forgot password | Link arrives, new password set, old session invalidated |
 | MFA code | MFA challenge | Code arrives and is accepted within expiry window |
-| Payment receipt | Supporter payment / Investor subscription | Correct amount, correct tier shown |
+| Payment receipt | Boost payment / Server feature subscription | Correct amount, correct context shown |
 | Subscription renewal | Investor billing cycle | Renewal confirmed, no downgrade |
 | Subscription failed | Payment failure | User notified, grace period started |
 | Subscription cancelled / lapsed | Cancellation or non-renewal | Downgrade warning, data retention notice |
@@ -202,20 +202,27 @@ All payments use **Stripe test mode**. No real money is charged.
 
 Use any future expiry date, any 3-digit CVC, and any postal code.
 
-### Supporter One-Off Payment
-1. Register with the "Supporter" option.
-2. Complete payment with test card `4242 4242 4242 4242`.
-3. Confirm `supporter` role assigned and Supporter Organisation created.
+### Investor One-Off Payment (Server Creation)
+1. Register with the Investor option.
+2. Complete the one-off payment with test card `4242 4242 4242 4242`.
+3. Confirm `investor` platform role assigned and Server creation unlocked.
 4. Verify payment receipt email arrives in Mailpit.
 
-### Investor Subscription
-1. Register with the "Investor" option; select one or more add-ons.
+### Server Feature Subscription
+1. As an Investor, subscribe a Feature to a Server.
 2. Complete payment with test card `4242 4242 4242 4242`.
 3. Confirm subscription created in Stripe test dashboard.
-4. Confirm Abilities granted in `user_abilities` table.
+4. Confirm Feature access granted on the Server.
 5. Test 3DS flow with card `4000 0025 0000 3155` — confirm the redirect/modal completes correctly.
-6. Test add-on removal and confirm Ability revoked at period end.
+6. Test feature removal and confirm access revoked at period end.
 7. Test failed renewal with card `4000 0000 0000 9995` — confirm alert email received and grace period logic triggers.
+
+### Boost Payment Test
+1. As any registered user, boost a Server.
+2. Complete the one-off boost payment with test card `4242 4242 4242 4242`.
+3. Confirm `supporter` role granted on that Server.
+4. Confirm credit balance updated on the Server.
+5. Verify payment receipt email arrives in Mailpit.
 
 ### Webhook Testing
 The Stripe CLI forwards events to the app.

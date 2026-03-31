@@ -10,11 +10,10 @@ The Life Planner is a unified task and goal scheduling tool. Users can create pl
 | Tier | Access |
 |---|---|
 | Public | None |
-| Free | None (Life Planner is a special feature, not part of the portfolio view) |
-| Supporter | **Interactive demo** — explore using sandboxed sample plans; changes are ephemeral |
-| Investor | **Full access** within their Tenant Organisation — real, persistent plans scoped to their tenant |
+| Free | None |
+| Investor | **Full access** within their own Server — real, persistent plans |
 
-The Life Planner is a **special feature**. Supporter users can experience it as a demo; Investor users use it as a genuine planning tool in their own tenant space.
+The Life Planner is a Server Feature. It is enabled per-Server by the Server owner via their Feature subscription.
 
 ---
 
@@ -27,7 +26,7 @@ The primary unit. Represents a scheduled task, a goal, or a recurring commitment
 |---|---|---|
 | `id` | uuid | |
 | `user_id` | FK → users | Owner |
-| `organisation_id` | FK → organisations | |
+| `server_id` | FK → servers | |
 | `title` | string | |
 | `description` | text | nullable, rich text |
 | `context` | enum | `work` \| `hobby` \| `life_goal` \| `custom` |
@@ -99,35 +98,35 @@ plan_subtasks
 - Toggle contexts on/off for a personalised view.
 - Colour-coded by context (and tag for custom).
 
-### Timeline / Gantt View (Investor Ability)
+### Timeline / Gantt View (Server Feature)
 - Horizontal timeline view showing plans with start and due dates as bars.
 - Useful for Life Goal tracking and project planning.
-- Gated behind an Investor add-on Ability.
+- Gated behind the Server Feature subscription.
 
 ### Recurring Plans
 - Same recurrence mechanism as Expense Planner (shared `recurrence_rule` JSON shape).
 - e.g. "Weekly team standup", "Monthly review", "Annual goal check-in".
 - Occurrences are generated ahead of time; each occurrence can be independently completed.
 
-### Team-Shared Plans (Investor Ability)
-- Investor can create plans visible/shared within their Organisation or a specific Team.
-- Team members can be assigned to shared plans.
+### Team-Shared Plans (Server Feature)
+- Investor can create plans visible/shared within their Server or a specific Group.
+- Group members can be assigned to shared plans.
 - Shared plans show an "assignees" field.
-- Gated behind an Investor Ability/add-on.
+- Gated behind the Server Feature subscription.
 
 ---
 
 ## Permissions
 
-| Permission | `owner` | `free` | `supporter` | `investor` |
-|---|---|---|---|---|
-| `plans.read` | ✅ | ❌ | ✅ (demo/sandboxed) | ✅ (tenant) |
-| `plans.create` | ✅ | ❌ | ✅ (demo/sandboxed) | ✅ (tenant) |
-| `plans.update` | ✅ | ❌ | ✅ (demo/sandboxed) | ✅ (tenant) |
-| `plans.delete` | ✅ | ❌ | ✅ (demo/sandboxed) | ✅ (tenant) |
-| `plans.tags.manage` | ✅ | ❌ | ❌ | ✅ (tenant) |
-| `plans.shared` | ✅ | ❌ | ❌ | ✅ (Ability) |
-| `plans.timeline_view` | ✅ | ❌ | ❌ | ✅ (Ability) |
+| Permission | `super_owner` | `investor` | `free` |
+|---|---|---|---|
+| `plans.read` | ✅ | ✅ (own Server) | ❌ |
+| `plans.create` | ✅ | ✅ (own Server) | ❌ |
+| `plans.update` | ✅ | ✅ (own Server) | ❌ |
+| `plans.delete` | ✅ | ✅ (own Server) | ❌ |
+| `plans.tags.manage` | ✅ | ✅ (own Server) | ❌ |
+| `plans.shared` | ✅ | ✅ (Server Feature) | ❌ |
+| `plans.timeline_view` | ✅ | ✅ (Server Feature) | ❌ |
 
 ---
 
@@ -135,9 +134,9 @@ plan_subtasks
 
 | View | Available To |
 |---|---|
-| Unified list / all contexts | Supporter, Investor |
-| Per-context filter view | Supporter, Investor |
-| Custom tag view | Supporter, Investor |
+| Unified list / all contexts | Investor, Super Owner |
+| Per-context filter view | Investor, Super Owner |
+| Custom tag view | Investor, Super Owner |
 | Calendar | Supporter, Investor |
 | Timeline / Gantt | Investor (Ability) |
 | Team-shared plans | Investor (Ability) |

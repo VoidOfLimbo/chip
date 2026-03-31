@@ -13,70 +13,118 @@ When this file changes, review and update the rest of the planning docs to keep 
 - After each change, run a quick consistency pass on all files in `plan/` and update any sections that needs updating.
 
 ## What We Are Building
-Chip is a **personal portfolio and multi-tenant productivity platform** built with Laravel + Inertia (Vue frontend). The application owner uses it as their own productive workspace and personal showcase. Other users interact with the app at different levels — browsing the owner's public profile, trying interactive demos, or becoming full tenants with their own dedicated space.
+Chip is a **community platform with a flexible page builder and personal productivity tools**, built with Laravel + Inertia (Vue frontend). Users create accounts, join Servers (community spaces similar to Discord), view and interact with Pages published inside those Servers, and optionally pay to unlock features. The Super Owner runs the platform and hosts the primary Server ("Limbo"). Investors pay a one-off fee to create their own Server and subscribe features to it monthly. Any member can boost a Server to contribute toward its costs and gain supporter status on that Server.
 
-## Roles at a Glance
+---
 
-| Who | What they are |
+## Platform Roles
+
+| Role | How gained | What it unlocks |
+|---|---|---|
+| `super_owner` | Seeded at install (Void) | Absolute platform access; unlimited Servers at no cost; sets platform feature prices and caps |
+| `investor` | One-off payment to platform (fixed price, set by super_owner) | Creates one Server; subscribes features to it monthly |
+| `free` | Registration (no cost) | Joins Servers via public request or invite; sees what Server owner permits |
+
+Platform roles are permanent and independent. A user holds exactly one platform role.
+
+---
+
+## Server Roles (per-Server, independent of platform role)
+
+| Role | How gained |
 |---|---|
-| **Owner** | The person who runs the app; has full super-admin control (`owner` role) |
-| **Free user** | A visitor who can browse the owner's and any tenant's public portfolio/CV |
-| **Supporter** | A paying visitor who can experience interactive demos of the app's features |
-| **Investor** | A paying tenant who gets their own space — with their own public section, demo section, and full access to all productivity tools |
+| `server_owner` | Created the Server |
+| `moderator` | Appointed by server_owner; must be a supporter of that Server |
+| `supporter` | Has boosted that Server with a payment |
+| `member` | Has joined the Server |
+
+A user can hold different Server roles across different Servers simultaneously.
+
+---
 
 ## High-Level Features
 
-### Account Tiers
-- **Landing page** (`/`) is public — accessible to everyone, no login required.
-- **Free** — requires login — read-only access to the owner's public portfolio and any tenant's public portfolio (CV/profile, projects, public content). Similar to viewing a LinkedIn profile. Assigned to the Public Organisation.
-- **Supporter** — everything Free can see, plus interactive demos of all special features (sandboxed, limited); one-off payment. Creates their own named Supporter Organisation.
-- **Investor** — becomes a **tenant**: gets their own dedicated space that mirrors the owner's structure. Can expose their own public section (like Free) and their own demo section (like Supporter) to others. Full access to all special features. Monthly subscription, feature-driven pricing. Creates their own named Tenant Organisation.
+### Landing Page & Registration
+- Landing page (`/`) is public — shows public pages of the platform and sign-up options.
+- Registering creates a `free` account. No payment required.
 
-### Organisations & Teams
-- The **Owner Organisation** (seeded as "Limbo", type `owner`) is the root admin organisation, created at install. The Owner ("Void") is its sole member.
-- The **Public Organisation** (seeded as "Public", type `public`) is also created at install. Free users are automatically assigned to it (read-only).
-- **Supporter** users create their own named **Supporter Organisation** (type `supporter`) at registration or on upgrade from Free — demo-scoped, no teams.
-- Each **Investor** creates a named **Tenant Organisation** (type `tenant`) at registration or on upgrade — their private space within the platform.
-- Tenant Organisations can contain Teams; only the Investor (tenant owner) can manage Teams.
+### Access Flow — Owner's Server (Limbo)
+1. Free user registers → receives **time-limited preview** of pages the Owner marks as free-accessible.
+2. Before or after expiry: can request a **1-week extension once per week**.
+3. Can request access to specific **demo features** — Owner approves per user.
+4. **Monthly subscription** (supporter path): user waives the 14-day EU/UK cancellation right at signup and on each auto-renewal → gains sustained access to features the Owner permits supporters → gains `supporter` role on Limbo.
+5. **Separate one-off Investor payment**: gains `investor` platform role → can create their own Server.
 
-### Roles, Permissions & Abilities
-- **Permissions** are predefined at build time and are granular action gates.
-- **Roles** map to account tiers: `owner`, `free`, `supporter`, `investor`.
-- **Abilities** are feature-flags granted by role or unlocked via Investor subscription add-ons.
-- Investor subscription cost is the sum of chosen feature add-ons.
+### Servers
+- Only `super_owner` and `investor`-role users can create Servers.
+- Maximum **one Server per user** (except `super_owner` who has no limit).
+- `super_owner`'s Server is seeded at install — no cost.
+- Each Server has its own monthly cost = sum of features currently subscribed to it.
+- Server capacity (member slots, groups) has a base value and can be increased.
 
-### Payments & Subscriptions
-- Supporter pays a **one-off** fee for permanent demo access.
-- Investor pays a **monthly subscription** whose cost is the sum of chosen feature add-ons.
-- Payment flow built and tested in development (Sail + Stripe test mode).
+### Joining a Server
+- Free users join via a **public join request** (if the Server exposes this) or an **invite** (email or link with OTP verification).
+- A **time-limited preview** lets a user browse a Server before formally joining.
+- Server owner controls what joined members (free, supporter, any group) can see and access.
+
+### Boosting & Server Credit Pool
+- Any registered user can **boost** a Server with a one-off payment.
+- The boost amount must be between £0 and the maximum the Server owner sets for that feature.
+- Boosting grants `supporter` role on that Server.
+- All boost payments flow into the **Server's credit pool** — no cash out.
+- The Server owner can invest credits toward:
+  - Subscribing or maintaining Features on the Server
+  - Purchasing additional Member Slots
+  - Offsetting the Server's monthly feature subscription bill
+- Unspent credits automatically offset the next monthly bill.
+- **Refund policy**: 80% of original payment. Full refund details subject to legal review.
+
+### Member Slots (N)
+- A base value of N member slots is included in the Investor one-off payment.
+- N is a separately subscribable add-on, priced per increment (e.g. per 10 extra members).
+- Any Server member can contribute boost payments toward the credit pool, which the Server owner can invest in additional slots.
+
+### Features
+- Features are subscribable modules: Expense Planner, Life Planner, OCR File Parser, Image Processor, and more to come.
+- The `super_owner` defines available features and their monthly prices on the platform.
+- A Server owner subscribes features to their Server — each adds to the Server's monthly cost.
+- The Server owner fully controls which members (free, supporter, specific group) can access each feature, and at what cost (£0 up to the platform-defined maximum).
+- Feature usage has limits per Server tier. Higher boost tier = higher usage limits.
+- New features are released on an ongoing cycle; existing features receive continuous bug fixes and improvements.
+
+### Pages & Page Builder
+- The primary content unit in a Server is a **Page**.
+- Pages are built with a block-based page builder: flexible content blocks (text, image, 3D containers, etc.) composed by the Server owner.
+- Each Page has a visibility setting; each block within a page also has its own visibility.
+- **Visibility levels**: `public`, `link` (requires OTP to view), `authenticated`, `server` (any Server member), `group` (specific Group), `private`.
+- Link-based sharing requires OTP verification (email or phone) to identify the viewer — no anonymous access.
+- All content access events, share token usage, and OTP attempts are logged for security and accountability.
+- Public pages are indexable by crawlers; all other visibility levels are excluded via `robots.txt`.
+- **Future**: discussion-type Pages with real-time chat, voice, video, and screen sharing.
+
+### Groups
+- Groups replace Teams. A Group is a named sub-group within a Server.
+- Server owners use Groups to organise members and scope page/feature access.
+- Any registered user can be in a Group; the Server owner manages Group membership.
+
+### Follow
+- Any authenticated user can follow another user or a Server.
+- Unidirectional (Twitter/LinkedIn-style). Mutual connections deferred to a future version.
+
+### Payments
+- **Investor one-off**: fixed amount (set by `super_owner` in platform config) to unlock Server creation.
+- **Server feature subscriptions**: monthly, per-feature price set by `super_owner`; billed to the Server owner.
+- **Member slot add-on**: separately subscribable, priced per increment.
+- **Supporter boost**: one-off payment to a specific Server; amount between £0 and the Server owner's set maximum.
+- **Supporter monthly subscription** (Limbo only path): monthly, sustained access; 14-day cancellation right waived.
+- All Server-received payments enter the Server credit pool — no cash out.
+- Refund: 80% of original payment.
 
 ### Development Environment
 - Local development via **Laravel Sail** (Docker) with PostgreSQL, Redis, pgAdmin, and Mailpit.
 - All tables use **ULID** primary keys.
 - Payment integration tested end-to-end in the Sail environment using Stripe test mode.
 - Queues, scheduled tasks, and email notifications all run and are testable within the Sail stack.
-
-### Application Features
-
-#### Portfolio / CV
-- The owner's public profile: bio, skills, experience, projects, and any content they choose to publish.
-- Fully visible to Free users (and everyone). This is the primary draw for Free sign-ups.
-- Investors get their own portfolio section within their Tenant space.
-
-#### Expense Planner
-- Track and plan expenses with full recurring-cost support (bills, rent, subscriptions, etc.).
-- **Supporter**: interactive demo with sandboxed sample data — can explore the feature without persistent storage.
-- **Investor**: full access within their Tenant space — their own real, persistent expense data.
-
-#### Life Planner
-- Schedule and track tasks across life contexts: Work, Hobby, Life Goals, and custom tags.
-- **Supporter**: interactive demo with sandboxed sample data.
-- **Investor**: full access within their Tenant space, including team-shared plans (add-on).
-
-#### Smart Productivity Tools
-- OCR File Parser, Image Processor, and future tools.
-- **Supporter**: limited demo — try a tool with a sample/uploaded file (no persistent results).
-- **Investor**: full access via Ability/subscription add-ons within their Tenant space.
 
 ---
 
@@ -85,11 +133,12 @@ Chip is a **personal portfolio and multi-tenant productivity platform** built wi
 | Area | Status | Notes |
 |---|---|---|
 | Account tiers & access | Planning | See `blueprint/access-tiers.md` |
-| Organisations & Teams | Planning | See `blueprint/organisations-teams.md` |
+| Servers & Groups | Planning | See `blueprint/servers-groups.md` |
+| Pages & Page Builder | Planning | See `blueprint/pages-builder.md` |
+| Content Visibility & Access Logging | Planning | See `blueprint/content-visibility.md` |
 | Roles, Permissions & Abilities | Planning | See `blueprint/roles-permissions.md` |
 | Payments & Subscriptions | Planning | See `blueprint/payments-subscriptions.md` |
 | Development Setup | Planning | See `blueprint/development-setup.md` |
-| Portfolio / CV | Planning | See `blueprint/portfolio.md` |
 | Expense Planner | Planning | See `blueprint/expense-planner.md` |
 | Life Planner | Planning | See `blueprint/life-planner.md` |
 | Smart Productivity Tools | Planning | See `blueprint/smart-productivity-tools.md` |
