@@ -53,6 +53,12 @@
 | 2.15 | `payments` | Planning | — |
 | 2.16 | `donations` | Planning | — |
 | 2.17 | `payment_consents` | Planning | Replaces `subscription_waivers`; records consent for all payment types |
+| 2.18 | `server_invite_list` | Planning | Used when `join_mode = invite_list` |
+| 2.19 | `server_preview_extension_requests` | Planning | User self-service preview extension requests |
+| 2.20 | `server_demo_access_requests` | Planning | User self-service demo feature access requests |
+| 2.21 | `user_follows` | Planning | User-to-user follow records |
+| 2.22 | `server_follows` | Planning | User-to-server follow records |
+| 2.23 | `content_private_grants` | Planning | Explicit individual grants for `private` visibility |
 
 ---
 
@@ -80,6 +86,7 @@
 | 4.4 | `super_owner` Gate::before bypass | Planning | — |
 | 4.5 | Platform role gates defined | Planning | — |
 | 4.6 | Database seeder: Void + Limbo + feature catalogue + component definitions | Planning | — |
+| 4.7 | `username`, `username_changed_at`, `profile_image`, `cover_image` columns on `users` | Planning | See `blueprint/access-tiers.md` User Profiles |
 
 ---
 
@@ -88,9 +95,9 @@
 | # | Task | Status | Notes |
 |---|---|---|---|
 | 5.1 | `ServerMember` query service | Planning | — |
-| 5.2 | `EnsureServerMember` middleware | Planning | — |
+| 5.2 | `EnsureServerMember` middleware | Planning | Applied to member-required routes only — NOT blanket on all server routes |
 | 5.3 | `EnsureServerRole` middleware (parametric) | Planning | `server.role:moderator` etc. |
-| 5.4 | `ServerPolicy` | Planning | `approveJoin` server_owner only |
+| 5.4 | `ServerPolicy` | Planning | `addDirect` server_owner only; no join request approval (removed with old join model) |
 | 5.5 | `PagePolicy` (with visibility checks) | Planning | — |
 | 5.6 | `PageComponentPolicy` | Planning | — |
 | 5.7 | `ModerationPolicy` | Planning | Moderator-scoped actions |

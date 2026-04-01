@@ -17,32 +17,22 @@ Chip is a **community platform with a flexible page builder and personal product
 
 ---
 
-## Platform Roles
+## Roles
 
-| Role | How gained | What it unlocks |
-|---|---|---|
-| `super_owner` | Seeded at install (Void) | Absolute platform access; unlimited Servers at no cost; sets platform feature prices and caps |
-| `investor` | One-off payment to platform (fixed price, set by super_owner) | Creates one Server; subscribes features to it monthly |
-| `free` | Registration (no cost) | Joins Servers via public request or invite; sees what Server owner permits |
+**Platform tiers** (`free` / `investor`) and the `super_owner` webapp operator are defined in [`blueprint/access-tiers.md`](access-tiers.md). Platform roles are permanent; a user holds exactly one.
 
-Platform roles are permanent and independent. A user holds exactly one platform role.
-
----
-
-## Server Roles (per-Server, independent of platform role)
-
-| Role | How gained |
-|---|---|
-| `server_owner` | Created the Server |
-| `moderator` | Appointed by server_owner; must be a supporter of that Server |
-| `supporter` | Has boosted that Server with a payment |
-| `member` | Has joined the Server |
-
-A user can hold different Server roles across different Servers simultaneously.
+**Server roles** (`server_owner` / `moderator` / `supporter` / `member`) — per-server, independent of platform tier — are defined in [`blueprint/servers-groups.md`](servers-groups.md).
 
 ---
 
 ## High-Level Features
+
+### User Profiles
+- Every user has a public profile at `/u/{username}` with a profile image and cover image.
+- Each user chooses a unique **username** (handle) at registration — e.g. `voidoflimbo`. Human-readable; not a GUID (the internal ULID primary key serves as the unique ID).
+- **Free users** may upload static images only (JPEG, PNG, WebP) for both profile and cover.
+- **Investor / Super Owner** users may also upload dynamic images (animated GIF, WebM, MP4).
+- Image format restrictions are enforced at upload time based on platform role.
 
 ### Landing Page & Registration
 - Landing page (`/`) is public — shows public pages of the platform and sign-up options.
@@ -50,8 +40,8 @@ A user can hold different Server roles across different Servers simultaneously.
 
 ### Access Flow — Owner's Server (Limbo)
 1. Free user registers → receives **time-limited preview** of pages the Owner marks as free-accessible.
-2. Before or after expiry: can request a **1-week extension once per week**.
-3. Can request access to specific **demo features** — Owner approves per user.
+2. Before or after expiry: can request a **1-week extension once per week** — Server owner or moderator approves or **denies** with an optional message shown to the user. Denial permanently blocks further **self-service** extension requests on that Server. The server owner can still directly add the user as a full member at any time.
+3. Can request access to specific **demo features** — Owner approves or **denies** with an optional message. Denial permanently blocks future **self-service** demo access requests for that feature on that Server. The server owner can still grant access directly at any time.
 4. **Monthly subscription** (supporter path): user waives the 14-day EU/UK cancellation right at signup and on each auto-renewal → gains sustained access to features the Owner permits supporters → gains `supporter` role on Limbo.
 5. **Separate one-off Investor payment**: gains `investor` platform role → can create their own Server.
 
@@ -63,7 +53,10 @@ A user can hold different Server roles across different Servers simultaneously.
 - Server capacity (member slots, groups) has a base value and can be increased.
 
 ### Joining a Server
-- Free users join via a **public join request** (if the Server exposes this) or an **invite** (email or link with OTP verification).
+- Server owners configure a `join_mode` that determines who can join:
+  - `link` — anyone who clicks an invite link and verifies via OTP.
+  - `invite_list` — only people whose email is on the Server's invite list; auto-enrolled on login/registration if their email is already listed; link path also available.
+  - `manual` — owner/moderator adds existing platform users directly by email match; no invite links.
 - A **time-limited preview** lets a user browse a Server before formally joining.
 - Server owner controls what joined members (free, supporter, any group) can see and access.
 
@@ -108,8 +101,8 @@ A user can hold different Server roles across different Servers simultaneously.
 - Each component type has a defined config schema and optional data source bindings (server stats, member list, expense data, Hall of Fame donors, etc.).
 - The Component Library holds platform-shipped components and Server-custom components defined by the Server owner.
 - Each Page has a visibility setting; each placed component also has its own visibility.
-- **Visibility levels**: `public`, `link` (requires OTP to view), `authenticated`, `server` (any Server member), `group` (specific Group), `private`.
-- Link-based sharing requires OTP verification (email or phone) to identify the viewer — no anonymous access.
+- **Visibility stack** (fully ordered, each level supersedes all below): `public`(1) → `users`(2) → `pros`(3) → `followers`(4) → `friends`(5) → `members`(6) → `supporter`(7) → `moderator`(8) → `owner`(9). Access is granted if the viewer’s highest qualifying level ≥ content’s level.
+- `link` (OTP share-token) and `private` (explicit individual grants) are out-of-band mechanisms outside the ordered stack. See `blueprint/content-visibility.md`.
 - All content access events, share token usage, and OTP attempts are logged for security and accountability.
 - Public pages are indexable by crawlers; all other visibility levels are excluded via `robots.txt`.
 - **Future**: discussion-type Pages with real-time chat, voice, video, and screen sharing.
@@ -121,7 +114,11 @@ A user can hold different Server roles across different Servers simultaneously.
 
 ### Follow
 - Any authenticated user can follow another user or a Server.
-- Unidirectional (Twitter/LinkedIn-style). Mutual connections deferred to a future version.
+- User-to-user follows are **bidirectional**: either side can independently follow the other. When both A→B and B→A follow records exist, they are **mutual followers** (`friends` level).
+- Mutual follow is a passive state automatically derived from the two follow records — it is not the same as a **connection** (a separate explicit social graph concept, to be defined).
+- Followers (level 4) can access content the person they follow sets to `followers` or lower.
+- Mutual followers (level 5) can access content set to `friends` or lower.
+- Being a server member (level 6) supersedes `friends` — members can see follower/friends content on that server without needing the follow relationship.
 
 ### Payments
 - **Investor one-off**: fixed amount (set by `super_owner` in platform config) to unlock Server creation.

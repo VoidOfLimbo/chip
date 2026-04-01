@@ -49,8 +49,8 @@ pages
   title             string
   slug              string (unique within server)
   description       text nullable
-  visibility        enum: public | link | authenticated | server | group | private
-  group_id          FK → groups nullable   (when visibility = group)
+  visibility        enum: public | users | pros | followers | friends | members | supporter | moderator | owner | link | private
+  group_id          FK → groups nullable   (sub-scope when visibility = members)
   preview_visible   boolean default false  (expose during time-limited Server preview)
   is_published      boolean default false
   row_height_px     integer default 80     (pixel height of one grid row)
@@ -96,8 +96,8 @@ page_components
   h                 integer                 (height in rows, >= min_h)
   config            json                    (instance content and settings — shape defined by component_def config_schema)
   data_source       json nullable           (binding spec — shape defined by component_def datasource_schema)
-  visibility        enum: public | link | authenticated | server | group | private
-  group_id          FK → groups nullable    (when visibility = group)
+  visibility        enum: public | users | pros | followers | friends | members | supporter | moderator | owner | link | private
+  group_id          FK → groups nullable    (sub-scope when visibility = members)
   is_locked         boolean default false   (true = only server_owner can edit; moderators view only)
   created_by        FK → users
   deleted_at        timestamp nullable      (soft delete — retained for access log integrity)
@@ -108,16 +108,23 @@ page_components
 
 ## Visibility Rule
 
-A component's visibility **cannot be less restrictive than its parent Page's visibility**.
+A component's visibility **cannot be less restrictive than its parent Page's visibility**. Visibility levels are fully ordered (1–9); a component may only be set to the same level or a more restrictive one.
+
+`link` and `private` are out-of-band mechanisms. A `link`-shared component overlays any stack level. A `private`-grant component sits outside the ordered comparison entirely.
 
 | Page visibility | Component can be set to |
 |---|---|
-| `private` | `private` only |
-| `group` | `group`, `private` |
-| `server` | `server`, `group`, `private` |
-| `authenticated` | `authenticated`, `server`, `group`, `private` |
-| `link` | `link`, `authenticated`, `server`, `group`, `private` |
+| `owner` | `owner`, `private`, `link` only |
+| `moderator` | `moderator` and more restrictive |
+| `supporter` | `supporter` and more restrictive |
+| `members` | `members` and more restrictive |
+| `friends` | `friends` and more restrictive |
+| `followers` | `followers` and more restrictive |
+| `pros` | `pros` and more restrictive |
+| `users` | `users` and more restrictive |
 | `public` | Any level |
+| `private` | `private` only |
+| `link` | `link` — stack level is independent of the link mechanism |
 
 ---
 

@@ -3,38 +3,10 @@
 ## Overview
 Authorization has two distinct layers:
 
-1. **Platform roles** — permanent, one per user, control what the user can do across the whole platform.
-2. **Server roles** — per-server, control what the user can do within a specific Server.
+1. **Platform tiers** — permanent, one per user. Defined in [`blueprint/access-tiers.md`](access-tiers.md). Short form: `free` (registered user), `investor` (can create one Server), `super_owner` (webapp operator, bypasses all gates unconditionally).
+2. **Server roles** — per-server, independent of platform tier. Defined in [`blueprint/servers-groups.md`](servers-groups.md). Short form: `server_owner` → `moderator` → `supporter` → `member`.
 
----
-
-## Platform Roles
-
-| Role | Description |
-|---|---|
-| `super_owner` | One, seeded at install. Absolute access. Bypasses all gates and policies. |
-| `investor` | Has paid the one-off Investor fee. Can create and own one Server. |
-| `free` | Registered user. No Server creation. Can join, follow, and boost Servers. |
-
-Platform role is assigned permanently:
-- `super_owner` — seeded only.
-- `investor` — assigned on successful Investor one-off payment. Cannot be downgraded.
-- `free` — assigned on registration.
-
----
-
-## Server Roles
-
-Server roles are per-Server and independent of platform role.
-
-| Role | Granted by | Requirement |
-|---|---|---|
-| `server_owner` | System on Server creation | `investor` or `super_owner` platform role |
-| `moderator` | `server_owner` manually | Must be a `supporter` of this Server |
-| `supporter` | System on boost payment | Has boosted this Server |
-| `member` | System on join approval | Registered user |
-
-A user holds one Server role per Server — the highest applicable. See `blueprint/servers-groups.md`.
+This file defines only the **permission strings**, **policies**, **middleware**, and the **authorization flow** — not the roles themselves.
 
 ---
 
@@ -54,8 +26,8 @@ Inherits all `free` permissions, plus:
 - `server.pages.update` — edit Pages and components
 - `server.pages.delete` — soft-delete Pages and components
 - `server.pages.publish` — publish / unpublish Pages
-- `server.members.join.approve` — **approve or reject** public join requests (**server_owner only — never delegated to moderators**)
-- `server.members.invite` — send email or link invites
+- `server.members.add.direct` — directly add any existing platform user as a member by email (**server_owner only — never delegated to moderators**)
+- `server.members.invite` — generate invite links and manage the invite list (covers `link` and `invite_list` join modes)
 - `server.members.suspend` — suspend or remove members
 - `server.groups.manage` — create, edit, delete Groups; manage Group membership
 - `server.moderators.manage` — appoint and remove moderators
@@ -70,7 +42,7 @@ Moderators are responsible for **content moderation and community management** w
 **What moderators can do:**
 - `server.members.invite` — send email or link invites
 - `server.members.suspend` — suspend or remove members who violate rules
-- `server.members.preview_extend` — approve weekly preview extension requests from users
+- `server.members.preview_extend` — approve **or deny** weekly preview extension requests from users (denial permanently blocks the user from requesting on that Server)
 - `server.groups.members.manage` — add or remove users from existing Groups (cannot create or delete Groups)
 - `server.content.hide` — hide a page component that violates Server rules (`is_locked = true` on the instance)
 - `server.pages.view.all` — view all Pages regardless of visibility level (for moderation purposes)
@@ -85,14 +57,14 @@ Moderators are responsible for **content moderation and community management** w
 - Change Server settings
 
 ### `free`
-- `server.join.request` — submit a public join request to a Server
 - `server.preview.view` — view preview-accessible content during preview window
-- `server.preview.extend` — request a weekly preview extension
+- `server.preview.extend` — request a weekly preview extension (self-service; blocked permanently after a denial — owner can still add the user directly)
 - `server.page.view` — view Pages the Server owner has granted access to
 - `server.feature.view` — access Features the Server owner has granted access to
+- `server.feature.demo.request` — request demo access to a feature on a Server (self-service path; blocked permanently after a denial for that feature on that Server — owner can still grant access directly via `server.access.configure`)
 - `server.boost` — make a boost payment to a Server
 - `server.subscribe` — take out a supporter subscription to a Server (any term)
-- `user.follow` — follow another user or Server
+- `user.follow` — follow another user (bidirectional; followback creates mutual follow state) or a Server
 
 ---
 
@@ -132,7 +104,7 @@ server_feature_access
   id              ulid
   server_id       FK -> servers
   feature_id      FK -> features
-  grantee_type    enum: member | supporter | group | user
+  grantee_type    enum: member | supporter | moderator | group | user
   grantee_id      ulid nullable     (FK -> groups or users; null when grantee_type = member/supporter)
   granted_by      FK -> users
   created_at / updated_at
@@ -156,11 +128,13 @@ New features are added on an ongoing release cycle. Usage limit values per boost
 
 ```
 Request arrives
-  -> Is user super_owner?       Yes -> Allow unconditionally
-  -> Check platform role gate   Fail -> Deny
-  -> Check server role gate     Fail -> Deny
-  -> Check content visibility   Fail -> Deny
-  -> Check feature access rule  Fail -> Deny
+  -> Is user super_owner?             Yes -> Allow unconditionally
+  -> Resolve viewer's highest level   (1–9 per content-visibility.md evaluation order)
+  -> Is visibility = `private`?       Yes -> Check content_private_grants; Deny if no grant
+  -> Is visibility = `link`?          Yes -> Check share_token + OTP; Deny if invalid
+  -> Is viewer's level >= content level?  No -> Deny
+  -> Is visibility = `members` + group scope? Yes -> Check Group membership; Deny if not in group
+  -> Check feature access rule        Fail -> Deny
   -> Allow
 ```
 
@@ -172,7 +146,7 @@ All authorization is enforced **server-side only**. Frontend UI guards (hidden b
 
 | Middleware | Applied to | What it checks |
 |---|---|---|
-| `EnsureServerMember` | All `/server/{server}/*` routes | User is an active member (`status = active`) of the route-bound Server |
+| `EnsureServerMember` | Member-required routes only: server dashboard, settings, write actions, member-only features | User is an active member (`status = active`) of the route-bound Server. **Not applied to content-serving routes** — pages at `public`, `users`, `pros`, `followers`, `friends`, or `private` visibility must be accessible to non-members; those routes go directly to `PagePolicy`. |
 | `EnsureServerRole` | Role-gated routes (e.g. moderator-only) | User's `server_role` on the route-bound Server is at least the required level |
 
 - Middleware runs **before** the controller. Any request that fails the middleware check is aborted with `403 Forbidden` immediately — the controller never runs.

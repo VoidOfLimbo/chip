@@ -7,22 +7,80 @@ All content in Chip — Pages, Page Components, and future content types — car
 
 ## Visibility Levels
 
-| Level | Who can access | Crawler indexed? |
-|---|---|---|
-| `public` | Anyone, no login required | Yes — allowed via `robots.txt` |
-| `link` | Anyone with the link — **after OTP verification** | No |
-| `authenticated` | Any logged-in user | No |
-| `server` | Any active member of this Server | No |
-| `group` | Members of a specific Group within the Server | No |
-| `private` | Server owner and moderators only | No |
+All content carries a `visibility` level. Levels form a **fully ordered stack** — each level N is a strict superset of all levels below it (N supersedes N-1 through 1).
 
-All routes except `public` content are excluded from crawler indexing via `robots.txt`. A Page Component's visibility cannot be less restrictive than its parent Page's visibility (see `blueprint/pages-builder.md`).
+| Level | Slug | Who can access | Crawler indexed? |
+|---|---|---|---|
+| 1 | `public` | Anyone, no login required | Yes |
+| 2 | `users` | Any registered user | No |
+| 3 | `pros` | Any registered user who is an active supporter of **at least one** Server platform-wide | No |
+| 4 | `followers` | Users who follow the content owner | No |
+| 5 | `friends` | Mutual followers of the content owner (supersedes `followers` — mutual follow implies one-way follow) | No |
+| 6 | `members` | Active members of **this** Server | No |
+| 7 | `supporter` | Active supporters of **this** Server (server role ≥ `supporter`: includes `supporter`, `moderator`, `server_owner`) | No |
+| 8 | `moderator` | Moderators of **this** Server (server role = `moderator` or `server_owner`) | No |
+| 9 | `owner` | Content owner only | No |
+
+### Access Evaluation Rule
+
+To determine whether a viewer can see a piece of content, resolve their **highest qualifying level** using the following ordered checks (first match wins):
+
+1. Is the viewer the content owner? → level **9** (`owner`)
+2. Is the viewer a `moderator` of this Server? → level **8**
+3. Is the viewer a `supporter` of this Server? → level **7**
+4. Is the viewer an active `member` of this Server? → level **6**
+5. Is the viewer a mutual follower of the content owner? → level **5** (`friends`)
+6. Does the viewer follow the content owner? → level **4** (`followers`)
+7. Is the viewer a `pros` user (supporter of any server, platform-wide)? → level **3**
+8. Is the viewer any registered user? → level **2** (`users`)
+9. Unauthenticated visitor → level **1** (`public`)
+
+If the viewer’s highest qualifying level ≥ the content’s visibility level, access is **granted**. Otherwise, access is **denied**.
+
+**Breaking point at `members` (6):** Levels 1–5 are determined by platform/social standing and may span any server or user relationship. Levels 6–9 are determined by this Server’s membership hierarchy. Because N supersedes N-1, a server `member` automatically qualifies for follower-level and friends-level content on that Server even if they do not actually follow the content owner — server membership is the higher privilege.
+
+**Moderator → supporter dependency:** A user can only be a `moderator` while they maintain `supporter` status. If supporter status is lost (e.g. boost refunded), the user is automatically demoted to `member` — not `supporter`. Moderator level access and `moderator`-visibility content are revoked as part of that demotion.
+
+### Out-of-Band Mechanisms
+
+Two mechanisms sit **outside** the ordered stack. They do not appear in the ordered level table and cannot be compared with a level number:
+
+| Mechanism | Slug | How it works |
+|---|---|---|
+| Share link | `link` | Generates a share token + OTP. Grants temporary access to a specific piece of content regardless of the viewer’s stack level. See [Link Sharing & Share Tokens](#link-sharing--share-tokens). |
+| Private grant | `private` | Owner explicitly grants access to specific individual users via `content_private_grants`. Permanent until revoked. Not role-based — any registered user can be granted private access. See [Private Grants](#private-grants). |
+
+### Group Restrictions
+
+Group restrictions are a **sub-scope of `members`** (6): a page at `members` visibility can be further restricted to specific Group(s). Only active members who belong to the specified Group(s) can see it. Group-scoped content is still level 6 for all other evaluation purposes.
+
+---
+
+## Private Grants
+
+Content set to `private` visibility is only accessible to users the content owner has explicitly granted access to. This is not an ordered level — it is an individual grant that bypasses the stack entirely.
+
+- Any registered user can be granted private access, regardless of their server role or follow status.
+- The owner manages grants via a UI panel; grants are revocable at any time.
+- A `private`-visibility page is otherwise invisible to everyone, including server moderators and supporters, unless they are explicitly in the grant list or are the server_owner.
+
+```
+content_private_grants
+  id              ulid
+  grantable_type  string           (e.g. "page", "page_component")
+  grantable_id    ulid
+  granted_to      FK → users
+  granted_by      FK → users
+  created_at
+```
+
+Unique constraint on `(grantable_type, grantable_id, granted_to)`.
 
 ---
 
 ## Link Sharing & Share Tokens
 
-Sharing content at the `link` visibility level generates a **share token**. All share tokens require OTP verification — there is no anonymous link access.
+Sharing content via the `link` mechanism generates a **share token**. All share tokens require OTP verification — there is no anonymous link access.
 
 ### OTP Verification Flow
 
@@ -85,16 +143,32 @@ access_logs
 | `otp_failed` | Viewer enters incorrect OTP |
 | `token_expired` | Share token accessed after expiry |
 | `token_exhausted` | Share token accessed after `max_uses` reached |
-| `access_denied` | Content access refused (insufficient role or visibility) |
-| `join_requested` | User submits a public join request to a Server |
-| `join_approved` | Join request approved by Server owner only |
-| `invite_accepted` | User accepts an email or link invite |
+| `access_denied` | Content access refused (insufficient visibility level) |
+| `join_requested` | User submits a join request to a Server |
+| `join_approved` | Join request approved by Server owner |
+| `invite_accepted` | User accepts an invite |
 | `preview_started` | User begins a time-limited Server preview |
 | `preview_expired` | User's preview window expires |
-| `preview_extended` | Server owner or moderator grants a preview extension |
+| `preview_extension_requested` | User requests a preview extension |
+| `preview_extension_approved` | Server owner or moderator approves an extension request |
+| `preview_extension_denied` | Server owner or moderator denies an extension request (blocks future self-service requests) |
+| `demo_access_requested` | User requests access to a demo feature |
+| `demo_access_approved` | Server owner approves a demo access request |
+| `demo_access_denied` | Server owner denies a demo access request (blocks future self-service requests) |
 | `server_boosted` | User makes a boost payment to a Server |
+| `member_suspended` | Owner or moderator suspends a member |
+| `member_suspension_lifted` | Suspension ended (manually lifted or `suspended_until` expired) |
+| `member_kicked` | Owner or moderator removes a member (row deleted; can rejoin) |
+| `member_banned` | Owner permanently bans a member |
+| `member_ban_lifted` | Owner lifts a ban |
+| `member_left` | Member voluntarily left the Server (row deleted) |
+| `moderator_demoted` | Moderator automatically demoted to `member` due to loss of `supporter` status |
 | `feature_access_granted` | Server owner grants a user or group access to a Feature |
 | `feature_access_revoked` | Server owner revokes feature access |
+| `user_followed` | User A follows user B |
+| `user_unfollowed` | User A unfollows user B |
+| `mutual_follow_formed` | User A and user B are now mutual followers |
+| `mutual_follow_broken` | One side of a mutual follow is removed |
 
 ---
 
