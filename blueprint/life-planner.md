@@ -10,10 +10,11 @@ The Life Planner is a unified task and goal scheduling tool. Users can create pl
 | Tier | Access |
 |---|---|
 | Public | None |
-| Free | None |
-| Investor | **Full access** within their own Server — real, persistent plans |
+| Free (preview window) | **Demo access** — limited by `demo_usage_limits`; auto-granted while preview is active (`demo_accessible = true` on this feature) |
+| Free (active member, no demo) | Access only if granted explicitly by server owner via `server_feature_access` |
+| Investor / Supporter | **Full access** within their Server — real, persistent plans |
 
-The Life Planner is a Server Feature. It is enabled per-Server by the Server owner via their Feature subscription.
+The Life Planner is a Server Feature (`slug: life_planner`). It is enabled per-Server by the Server owner. **`demo_accessible` defaults to `true`** — the `super_owner` may disable demo access globally at runtime.
 
 ---
 
@@ -118,15 +119,15 @@ plan_subtasks
 
 ## Permissions
 
-| Permission | `super_owner` | `investor` | `free` |
-|---|---|---|---|
-| `plans.read` | ✅ | ✅ (own Server) | ❌ |
-| `plans.create` | ✅ | ✅ (own Server) | ❌ |
-| `plans.update` | ✅ | ✅ (own Server) | ❌ |
-| `plans.delete` | ✅ | ✅ (own Server) | ❌ |
-| `plans.tags.manage` | ✅ | ✅ (own Server) | ❌ |
-| `plans.shared` | ✅ | ✅ (Server Feature) | ❌ |
-| `plans.timeline_view` | ✅ | ✅ (Server Feature) | ❌ |
+| Permission | `super_owner` | `investor` | `free` (full access) | `free` (demo) |
+|---|---|---|---|---|
+| `plans.read` | ✅ | ✅ (own Server) | ✅ (if granted) | ✅ (limited) |
+| `plans.create` | ✅ | ✅ (own Server) | ✅ (if granted) | ✅ (demo limits) |
+| `plans.update` | ✅ | ✅ (own Server) | ✅ (if granted) | ✅ (own plans only) |
+| `plans.delete` | ✅ | ✅ (own Server) | ✅ (if granted) | ❌ |
+| `plans.tags.manage` | ✅ | ✅ (own Server) | ✅ (if granted) | ❌ |
+| `plans.shared` | ✅ | ✅ (Server Feature) | ✅ (if granted) | ❌ |
+| `plans.timeline_view` | ✅ | ✅ (Server Feature) | ✅ (if granted) | ❌ |
 
 ---
 

@@ -10,10 +10,11 @@ Smart Productivity Tools is a collection of utility features that augment the co
 | Tier | Access |
 |---|---|
 | Public | None |
-| Free | None |
-| Investor | **Full access** within their own Server; results are persisted |
+| Free (preview window) | **Demo access** — limited by `demo_usage_limits`; auto-granted on a per-tool basis while preview is active. Each tool (`ocr_parser`, `image_processor`) has its own `demo_accessible` flag. |
+| Free (active member, no demo) | Access only if granted explicitly by server owner via `server_feature_access` |
+| Investor / Supporter | **Full access** within their Server; results are persisted |
 
-Smart Productivity Tools are Server Features. Each tool is enabled per-Server by the Server owner via their Feature subscription. Access to results is scoped to the Server where the tool is enabled.
+Smart Productivity Tools are Server Features. Each tool is enabled per-Server by the Server owner via their Feature subscription. Access to results is scoped to the Server where the tool is enabled. The `super_owner` may disable demo access for individual tools at runtime.
 
 ---
 
@@ -149,13 +150,13 @@ Potential additions as the feature set grows:
 
 Smart Productivity Tools are Server Features. Access is controlled entirely by the Server owner via `server_feature_access` rules (see `blueprint/roles-permissions.md`).
 
-| Permission | `super_owner` | `investor` | `free` |
-|---|---|---|---|
-| `tools.ocr` | ✅ | ✅ (Server Feature) | ❌ |
-| `tools.image_processor` | ✅ | ✅ (Server Feature) | ❌ |
-| `uploads.create` | ✅ | ✅ (Server Feature) | ❌ |
-| `uploads.read` | ✅ | ✅ (Server Feature) | ❌ |
-| `uploads.delete` | ✅ | ✅ (Server Feature) | ❌ |
+| Permission | `super_owner` | `investor` | `free` (full access) | `free` (demo) |
+|---|---|---|---|---|
+| `tools.ocr` | ✅ | ✅ (Server Feature) | ✅ (if granted) | ✅ (if `demo_accessible = true`) |
+| `tools.image_processor` | ✅ | ✅ (Server Feature) | ✅ (if granted) | ✅ (if `demo_accessible = true`) |
+| `uploads.create` | ✅ | ✅ (Server Feature) | ✅ (if granted) | ✅ (demo limits) |
+| `uploads.read` | ✅ | ✅ (Server Feature) | ✅ (if granted) | ✅ (own uploads only) |
+| `uploads.delete` | ✅ | ✅ (Server Feature) | ✅ (if granted) | ❌ |
 
 The Server owner subscribes `ocr_parser` and/or `image_processor` as Features to their Server, then grants access to specific members, groups, or supporters via access rules.
 

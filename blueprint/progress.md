@@ -184,7 +184,7 @@
 | Server boost (one-off) + credit pool + supporter role | Planning | `payments-subscriptions.md` | — |
 | Supporter subscription (multi-term, multi-Server) | Planning | `payments-subscriptions.md` | — |
 | 14-day cancellation right waiver (signup + renewal) | Planning | `payments-subscriptions.md` | — |
-| Renewal + expiry warning notifications (7d + 1d) | Planning | `payments-subscriptions.md` | — |
+| Renewal + expiry warning notifications (7d, 3d, 1d) | Planning | `payments-subscriptions.md` | — |
 | Donation + Hall of Fame opt-in | Planning | `payments-subscriptions.md` | — |
 | 7-day grace period on failed Investor Server bill | Planning | `payments-subscriptions.md` | — |
 | Pre-payment consent (all checkout flows) | Planning | `payments-subscriptions.md` | — |
@@ -217,4 +217,6 @@
 | `development-setup.md` | ✅ Complete | 2026-03-31 |
 | `expense-planner.md` | ✅ Complete | 2026-03-31 |
 | `life-planner.md` | ✅ Complete | 2026-03-31 |
+| `smart-productivity-tools.md` | ✅ Complete | 2026-03-31 |
 | `legal.md` | ✅ Complete | 2026-03-31 |
+| `privacy.md` | 🔜 Planned | — |

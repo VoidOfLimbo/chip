@@ -277,9 +277,7 @@ Pest feature tests for the payment flow should mock Stripe API responses (using 
 | `MAIL_PORT` | `1025` |
 | `STRIPE_KEY` | Stripe publishable test key (`pk_test_...`) |
 | `STRIPE_SECRET` | Stripe secret test key (`sk_test_...`) |
-| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret (`whsec_...`) |
-| `STRIPE_SECRET` | Stripe secret test key |
-| `STRIPE_WEBHOOK_SECRET` | From `stripe listen` output |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret (`whsec_...`) — from `stripe listen` output |
 | `CASHIER_CURRENCY` | `gbp` (or adjust) |
 
 ---

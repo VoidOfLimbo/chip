@@ -152,7 +152,7 @@ All authorization is enforced **server-side only**. Frontend UI guards (hidden b
 
 | Middleware | Applied to | What it checks |
 |---|---|---|
-| `EnsureServerMember` | Member-required routes only: server dashboard, settings, write actions, member-only features | User is an active member (`status = active`) of the route-bound Server. **Not applied to content-serving routes** — pages at `public`, `users`, `pros`, `followers`, `friends`, or `private` visibility must be accessible to non-members; those routes go directly to `PagePolicy`. |
+| `EnsureServerMember` | Full-member-required routes: server dashboard, settings, write actions, and member-only content routes | User is an **active** member (`status = active`) of the route-bound Server. **Not applied to feature routes** — feature endpoints check membership status at the Policy level (step 0 in Feature Access Rule Resolution) so that users in `preview` status can still access auto-demo features (`demo_accessible = true`). Also **not applied to content-serving routes** — pages at `public`, `users`, `pros`, `followers`, `friends`, or `private` visibility must be accessible to non-members; those routes go directly to `PagePolicy`. |
 | `EnsureServerRole` | Role-gated routes (e.g. moderator-only) | User's `server_role` on the route-bound Server is at least the required level |
 
 - Middleware runs **before** the controller. Any request that fails the middleware check is aborted with `403 Forbidden` immediately — the controller never runs.

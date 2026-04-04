@@ -243,7 +243,7 @@ server_subscriptions  (scoped view of user subscriptions per Server)
   user_id                   FK -> users
   server_id                 FK -> servers
   stripe_subscription_id    string
-  term                      enum: monthly | quarterly | biannual | annual
+  term                      enum: monthly | three_month | six_month | annual
   current_period_start      timestamp
   current_period_end        timestamp
   status                    enum: active | past_due | cancelled | expired
@@ -305,7 +305,7 @@ donations
    - `payment_consents` row inserted (type: `donation`).
    - `donations` row inserted.
    - Server's `credit_balance` incremented.
-   - `server_credit_transactions` row inserted (type: `boost_in`, description: "donation").
+   - `server_credit_transactions` row inserted (type: `donation_in`).
    - Hall of Fame data source updated (if `is_anonymous = false`).
 8. Confirmation email sent to donor.
 

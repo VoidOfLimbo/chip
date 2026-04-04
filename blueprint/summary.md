@@ -84,7 +84,7 @@ Chip is a **community platform with a flexible page builder and personal product
 - No cap — a user can hold simultaneous subscriptions to multiple Servers; each is billed independently.
 - Available terms: monthly, 3-month, 6-month, or annual (Server owner chooses which to offer).
 - The platform sends renewal reminders at **7 days**, **3 days**, and **1 day** before each renewal and the same schedule before expiry.
-- **Refund policy on subscriptions**: 80% within 7 days of a billing date, no refund after; cancellation also terminates immediately within the window. EU/UK 14-day cancellation right is waived at signup via explicit consent checkbox.
+- **Refund policy on subscriptions**: 80% within 7 days of a billing date, no refund after. If a refund is requested within 7 days, the subscription is cancelled and access removed immediately. Standard cancellation (without a refund request) retains access until the end of the current paid period. EU/UK 14-day cancellation right is waived at signup via explicit consent checkbox.
 
 ### Features
 - Features are subscribable modules: Expense Planner, Life Planner, OCR File Parser, Image Processor, and more to come.
