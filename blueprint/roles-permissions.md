@@ -61,7 +61,7 @@ Moderators are responsible for **content moderation and community management** w
 - `server.preview.extend` — request a weekly preview extension (self-service; blocked permanently after a denial — owner can still add the user directly)
 - `server.page.view` — view Pages the Server owner has granted access to
 - `server.feature.view` — access Features the Server owner has granted access to
-- `server.feature.demo.request` — request demo access to a feature on a Server (self-service path; blocked permanently after a denial for that feature on that Server — owner can still grant access directly via `server.access.configure`)
+- `server.feature.demo.request` — request demo access to a feature on a Server **only when the feature has `demo_accessible = false`** (self-service path; this request flow is skipped for auto-demo features; blocked permanently after a denial for that feature on that Server — owner can still grant access directly via `server.access.configure`)
 - `server.boost` — make a boost payment to a Server
 - `server.subscribe` — take out a supporter subscription to a Server (any term)
 - `user.follow` — follow another user (bidirectional; followback creates mutual follow state) or a Server
@@ -81,9 +81,13 @@ features  (platform-wide, seeded/managed by super_owner)
   description         text
   monthly_price_pence integer          (set by super_owner)
   usage_limits        json             (base limits per boost tier, as array)
+  demo_accessible     boolean default true   (super_owner toggles at runtime; true = auto-grant during preview)
+  demo_usage_limits   json nullable          (reduced limits during demo; null = use base usage_limits)
   is_active           boolean          (super_owner can disable a feature globally)
   created_at / updated_at
 ```
+
+**Demo access rule:** When a user has `preview` status on a Server (`server_members.status = preview`) AND that Server has the Feature subscribed AND `demo_accessible = true` → access is **automatically granted** at demo limits with no manual request required. When `demo_accessible = false`, the self-service request flow below applies instead.
 
 ### Server Feature Subscriptions
 ```
@@ -130,6 +134,8 @@ New features are added on an ongoing release cycle. Usage limit values per boost
 Request arrives
   -> Is user super_owner?             Yes -> Allow unconditionally
   -> Resolve viewer's highest level   (1–9 per content-visibility.md evaluation order)
+       Level 3 (pros) = user has at least one active supporter subscription platform-wide
+       Note: one-off boosts do NOT grant pros status
   -> Is visibility = `private`?       Yes -> Check content_private_grants; Deny if no grant
   -> Is visibility = `link`?          Yes -> Check share_token + OTP; Deny if invalid
   -> Is viewer's level >= content level?  No -> Deny
@@ -175,8 +181,9 @@ All authorization is enforced **server-side only**. Frontend UI guards (hidden b
 - Together they make it impossible to exploit the frontend (e.g. manually calling a route the UI hides) or to escalate permissions through crafted requests.
 
 ### Feature Access Rule Resolution (Most-Specific-Wins)
-When evaluating whether a user can access a Feature on a Server, rules in `server_feature_access` are resolved with **most-specific-wins**:
+When evaluating whether a user can access a Feature on a Server, the system first checks for auto-demo access, then resolves explicit rules with **most-specific-wins**:
 
+0. **Demo check first**: Is the user in `preview` status on this Server AND `features.demo_accessible = true` AND the Server has the Feature subscribed? → Grant demo access (limited by `demo_usage_limits`). Skip further rule resolution.
 1. Look for a `user`-scoped rule for the requesting user on this Server + Feature. If found, that rule is authoritative — stop.
 2. Look for a `group`-scoped rule covering any Group the user belongs to on this Server + Feature. If found, apply that rule.
 3. Look for a `member`-scoped rule (applies to all members) or `supporter`-scoped rule (applies to all supporters).

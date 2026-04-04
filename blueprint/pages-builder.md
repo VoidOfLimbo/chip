@@ -183,7 +183,8 @@ Server owners can extend the library with their own components:
 
 ## Page Builder Rules
 
-- Server owner and moderators can open the builder for any Page on their Server.
+- **Only the Server owner** can open the page builder and create, edit, or delete Pages and components. This is enforced by `PagePolicy` and the `server.pages.create` / `server.pages.update` / `server.pages.delete` permissions, which are restricted to `server_owner` only.
+- Moderators have `server.pages.view.all` — they can view all Pages (including unpublished drafts) for moderation purposes, but cannot open the builder, create, edit, or delete anything.
 - The builder provides a drag-and-drop canvas: components are picked from the Component Library panel, dragged onto the grid, and positioned/resized freely within constraints.
 - Each placed component opens a settings panel where the Server owner fills in the `config` fields and optionally sets a data source binding.
 - Components marked `is_locked = true` can only be edited by the `server_owner`; moderators see them but cannot change them.

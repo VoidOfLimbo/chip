@@ -10,10 +10,11 @@ The Expense Planner lets users track, categorise, and plan their personal or org
 | Tier | Access |
 |---|---|
 | Public | None |
-| Free | None |
-| Investor | **Full access** within their own Server — real, persistent expense data |
+| Free (preview window) | **Demo access** — limited by `demo_usage_limits`; auto-granted while preview is active (`demo_accessible = true` on this feature) |
+| Free (active member, no demo) | Access only if granted explicitly by server owner via `server_feature_access` |
+| Investor / Supporter | **Full access** within their Server — real, persistent expense data |
 
-The Expense Planner is a Server Feature. It is enabled per-Server by the Server owner via their Feature subscription.
+The Expense Planner is a Server Feature (`slug: expense_planner`). It is enabled per-Server by the Server owner. **`demo_accessible` defaults to `true`** — the `super_owner` may disable demo access globally at runtime.
 
 ---
 
@@ -117,16 +118,16 @@ expense_occurrences
 
 ## Permissions
 
-| Permission | `super_owner` | `investor` | `free` |
-|---|---|---|---|
-| `expenses.read` | ✅ | ✅ (own Server) | ❌ |
-| `expenses.create` | ✅ | ✅ (own Server) | ❌ |
-| `expenses.update` | ✅ | ✅ (own Server) | ❌ |
-| `expenses.delete` | ✅ | ✅ (own Server) | ❌ |
-| `expenses.server_shared` | ✅ | ✅ (Server Feature) | ❌ |
-| `expenses.export` | ✅ | ✅ (own Server) | ❌ |
+| Permission | `super_owner` | `investor` | `free` (full access) | `free` (demo) |
+|---|---|---|---|---|
+| `expenses.read` | ✅ | ✅ (own Server) | ✅ (if granted) | ✅ (limited) |
+| `expenses.create` | ✅ | ✅ (own Server) | ✅ (if granted) | ✅ (demo limits) |
+| `expenses.update` | ✅ | ✅ (own Server) | ✅ (if granted) | ✅ (own entries only) |
+| `expenses.delete` | ✅ | ✅ (own Server) | ✅ (if granted) | ❌ |
+| `expenses.server_shared` | ✅ | ✅ (Server Feature) | ✅ (if granted) | ❌ |
+| `expenses.export` | ✅ | ✅ (own Server) | ✅ (if granted) | ❌ |
 
-`expenses.server_shared` — allows creating and viewing expenses shared within a Server or Group. Gated behind the Server Feature subscription.
+`expenses.server_shared` — allows creating and viewing expenses shared within a Server or Group. Gated behind the Server Feature subscription. Not available during demo.
 
 ---
 

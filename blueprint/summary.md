@@ -1,7 +1,7 @@
 # Chip - Product Summary
 
 ## Planning Source of Truth
-This file is the high-level direction for the project. For each feature, there are more detailed documents in the `plan/` directory. Each of those documents should expand on the high-level features described here, and should be consistent with the direction set in this file.
+This file is the high-level direction for the project. For each feature, there are more detailed documents in the `blueprint/` directory. Each of those documents should expand on the high-level features described here, and should be consistent with the direction set in this file.
 
 When this file changes, review and update the rest of the planning docs to keep everything aligned with the end goal. This is a consistency check to ensure that all the details in the planning docs are still relevant and accurate based on the high-level direction set here.
 
@@ -10,7 +10,7 @@ When this file changes, review and update the rest of the planning docs to keep 
 - Treat changes here as product-direction changes.
 - When making changes here, review the rest of the planning docs to ensure they are still consistent with the new direction. Update any sections in those docs that need updating based on the changes made here.
 - Additionally maintain a progress tracker 
-- After each change, run a quick consistency pass on all files in `plan/` and update any sections that needs updating.
+- After each change, run a quick consistency pass on all files in `blueprint/` and update any sections that needs updating.
 
 ## What We Are Building
 Chip is a **community platform with a flexible page builder and personal productivity tools**, built with Laravel + Inertia (Vue frontend). Users create accounts, join Servers (community spaces similar to Discord), view and interact with Pages published inside those Servers, and optionally pay to unlock features. The Super Owner runs the platform and hosts the primary Server ("Limbo"). Investors pay a one-off fee to create their own Server and subscribe features to it monthly. Any member can boost a Server to contribute toward its costs and gain supporter status on that Server.
@@ -92,6 +92,7 @@ Chip is a **community platform with a flexible page builder and personal product
 - A Server owner subscribes features to their Server — each adds to the Server's monthly cost.
 - The Server owner fully controls which members (free, supporter, specific group) can access each feature, and at what cost (£0 up to the platform-defined maximum).
 - Feature usage has limits per Server tier. Higher boost tier = higher usage limits.
+- **Demo access**: each feature has a `demo_accessible` flag (default: `true`, managed by `super_owner` at runtime). When `true`, users in preview on a Server get automatic limited access to the feature at reduced (`demo_usage_limits`) limits — no request needed. When `false`, users must manually request demo access and the server owner approves/denies.
 - New features are released on an ongoing cycle; existing features receive continuous bug fixes and improvements.
 
 ### Pages & Page Builder
@@ -101,7 +102,7 @@ Chip is a **community platform with a flexible page builder and personal product
 - Each component type has a defined config schema and optional data source bindings (server stats, member list, expense data, Hall of Fame donors, etc.).
 - The Component Library holds platform-shipped components and Server-custom components defined by the Server owner.
 - Each Page has a visibility setting; each placed component also has its own visibility.
-- **Visibility stack** (fully ordered, each level supersedes all below): `public`(1) → `users`(2) → `pros`(3) → `followers`(4) → `friends`(5) → `members`(6) → `supporter`(7) → `moderator`(8) → `owner`(9). Access is granted if the viewer’s highest qualifying level ≥ content’s level.
+- **Visibility stack** (fully ordered, each level supersedes all below): `public`(1) → `users`(2) → `pros`(3) → `followers`(4) → `friends`(5) → `members`(6) → `supporter`(7) → `moderator`(8) → `owner`(9). Access is granted if the viewer's highest qualifying level ≥ content's level. `pros` = any registered user with at least one active supporter subscription to any Server platform-wide (one-off boosts do not qualify). See `blueprint/access-tiers.md`.
 - `link` (OTP share-token) and `private` (explicit individual grants) are out-of-band mechanisms outside the ordered stack. See `blueprint/content-visibility.md`.
 - All content access events, share token usage, and OTP attempts are logged for security and accountability.
 - Public pages are indexable by crawlers; all other visibility levels are excluded via `robots.txt`.

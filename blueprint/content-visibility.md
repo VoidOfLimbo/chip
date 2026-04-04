@@ -13,7 +13,7 @@ All content carries a `visibility` level. Levels form a **fully ordered stack** 
 |---|---|---|---|
 | 1 | `public` | Anyone, no login required | Yes |
 | 2 | `users` | Any registered user | No |
-| 3 | `pros` | Any registered user who is an active supporter of **at least one** Server platform-wide | No |
+| 3 | `pros` | Any registered user who holds **at least one active supporter subscription** to any Server platform-wide. A one-off boost alone does **not** qualify — the subscription must be currently active. | No |
 | 4 | `followers` | Users who follow the content owner | No |
 | 5 | `friends` | Mutual followers of the content owner (supersedes `followers` — mutual follow implies one-way follow) | No |
 | 6 | `members` | Active members of **this** Server | No |
@@ -31,7 +31,7 @@ To determine whether a viewer can see a piece of content, resolve their **highes
 4. Is the viewer an active `member` of this Server? → level **6**
 5. Is the viewer a mutual follower of the content owner? → level **5** (`friends`)
 6. Does the viewer follow the content owner? → level **4** (`followers`)
-7. Is the viewer a `pros` user (supporter of any server, platform-wide)? → level **3**
+7. Is the viewer a `pros` user (holds at least one **active supporter subscription** to any Server platform-wide — one-off boosts do not qualify)? → level **3**
 8. Is the viewer any registered user? → level **2** (`users`)
 9. Unauthenticated visitor → level **1** (`public`)
 
@@ -152,9 +152,10 @@ access_logs
 | `preview_extension_requested` | User requests a preview extension |
 | `preview_extension_approved` | Server owner or moderator approves an extension request |
 | `preview_extension_denied` | Server owner or moderator denies an extension request (blocks future self-service requests) |
-| `demo_access_requested` | User requests access to a demo feature |
+| `demo_access_requested` | User requests access to a demo feature (only for features with `demo_accessible = false`) |
 | `demo_access_approved` | Server owner approves a demo access request |
 | `demo_access_denied` | Server owner denies a demo access request (blocks future self-service requests) |
+| `demo_feature_auto_accessed` | User in `preview` status accesses a feature with `demo_accessible = true` (logged on first access per session) |
 | `server_boosted` | User makes a boost payment to a Server |
 | `member_suspended` | Owner or moderator suspends a member |
 | `member_suspension_lifted` | Suspension ended (manually lifted or `suspended_until` expired) |

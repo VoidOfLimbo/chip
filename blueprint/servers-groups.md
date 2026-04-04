@@ -111,6 +111,10 @@ Unique constraint on `(server_id, user_id)` where `status = pending` — only on
 
 ### Demo Feature Access Requests
 
+**Auto-demo access (most features):** When a feature has `demo_accessible = true` (the default, set by `super_owner`), any user in `preview` status on the Server automatically gets limited access to that feature — no request or approval needed. Usage is capped at `demo_usage_limits` defined on the feature. This is the standard path.
+
+**Manual request flow (opt-out features only):** When a feature has `demo_accessible = false`, users must request access manually:
+
 - Any user in a Server preview or active member can **request access to a specific demo feature** on that Server.
 - The Server owner reviews and **approves** or **denies** the request, with an optional message shown to the requesting user.
 - If **denied**, the user is permanently blocked from placing further **self-service** demo access requests for that feature on that Server.

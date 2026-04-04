@@ -38,7 +38,7 @@ The Super Owner is **not a tier** — they are the operator of the Chip webapp i
 - **Join a Server** via invite link (OTP-verified), invite list auto-enrol, or direct add by the owner/moderator — subject to the Server's `join_mode`.
 - Receive a **time-limited preview** of a Server upon first visit. During the preview they can see pages the Server owner marks as preview-accessible.
   - Before or after expiry: can request a **1-week extension once per week** — the Server owner or moderator approves or **denies** the request with an optional message. A denial permanently prevents the user from making further **self-service** extension requests on that Server. The server owner can still directly add the denied user as a full member at any time.
-- **Request access to demo features** on a Server — the Server owner approves or **denies** with an optional message. A denial permanently prevents the user from placing further **self-service** demo access requests for that feature on that Server. The server owner can still grant access directly at any time.
+- **Demo feature access**: while in the preview window, any Feature that the platform marks as `demo_accessible` is **automatically available** at reduced limits — no request or approval needed. Features explicitly set to `demo_accessible = false` by the `super_owner` require a manual request: the Server owner approves or **denies** with an optional message. A denial permanently prevents the user from placing further **self-service** demo access requests for that feature on that Server. The server owner can still grant access directly at any time.
 - **Follow** other users (bidirectional with followback — see User Follows below) or Servers.
 - Followers can see Servers owned by people they follow and access content at `followers` visibility or lower.
 - **Boost a Server** (one-off payment) → gains `supporter` server role on that Server and access to whatever the Server owner grants supporters.
@@ -61,6 +61,14 @@ Free users can take out a recurring supporter subscription to **any Server** (in
 
 ### Upgrade Path
 - Pay the **Investor one-off fee** → gains `investor` platform role → can create their own Server.
+
+### Pro Status (derived, not a tier)
+**Pro status** is a platform-wide derived state, not a stored tier. A user qualifies as `pros` if they hold **at least one active supporter subscription** to any Server on the platform. A one-off boost payment does **not** qualify.
+
+- Pro status is automatically computed from active subscription records. It is not assigned manually.
+- While a user holds pro status, content set to `pros` visibility (level 3) becomes accessible to them across the platform — on any Server where they otherwise have at least `users`-level access.
+- Pro status is **lost automatically** when all active supporter subscriptions expire or are cancelled. There is no grace period for `pros` visibility.
+- A user can hold pro status while remaining on the `free` platform tier — subscribing to a Server does not change their platform role.
 
 ---
 
