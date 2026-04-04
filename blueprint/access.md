@@ -1,14 +1,17 @@
 ## Visibility & Access Control
 Content visibility is determined by a stack of access levels. Each content item (page, component, feature) has a visibility level that determines who can access it. The levels are ordered from lowest to highest:
-1. `public` — anyone, including unauthenticated users
-2. `platform` — any authenticated user in the platform
-3. `chads` — users with an active subscription to any Server
-4. `followers` — users who follow the content owner (user or Server)
-5. `friends` — users who are in contact list of the content owner (different than mutual followers)
-6. `members` — users who are members of the Server that owns the content
-7. `supporters` — users with an active subscription to the Server that owns the content
-8. `moderators` — users with the moderator role on the Server that owns the content
-9. `owner` — the owner of the Server that owns the content
+
+| Level | Who Can Access |
+|---|---|
+| `public` | Anyone, including unauthenticated users |
+| `platform` | Any authenticated platform user |
+| `chads` | Users with an active subscription to any Server |
+| `followers` | Users following the content owner (user or Server) |
+| `friends` | Users in the content owner's contact list (not the same as mutual followers) |
+| `members` | Members of the Server that owns the content |
+| `supporters` | Active subscribers to the owning Server |
+| `moderators` | Moderators of the owning Server |
+| `owner` | The Server owner — always has full access |
 
 On top of this stack, there are also out-of-band access mechanisms:
 - `link` — anyone with the invite link and OTP can access; no authentication required;
@@ -25,10 +28,39 @@ The `superowner` will always have access to all servers and all content regardle
 
 All the actions related to visibility and access control will be logged for auditing purposes, including changes to visibility settings, access grants and revocations, and any access attempts by users. This is to ensure transparency and accountability in the management of content visibility and access on the platform. Audit logs will be accessible to server owners and the superowner, with appropriate access controls to protect user privacy and security. Any CRUD action on content items will also trigger notifications to the owner and relevant users based on the visibility settings, to keep them informed about changes to the content they have access to.
 
-## Access Tiers
-There are basically 3 access tiers on the platform:
-1. **Free**: This is the default tier for all users. It includes access to all `public` content and features, as well as the ability to create and manage their own profile, follow other users and servers, and interact with public content.
-2. **Premium**: This tier is for users who have paid to have their own server on the platform. These users can subscribe to features to be accessible in their own server. They also have access to invite peoples to the server who can have `Free` tier but can access the content of the server based on the visibility settings. This is to allow multiple users to access the features and utilize the subscription limitations more efficiently. 
-3. **Loyalist**: This tier is for users who have an active subscription to the entire platform. It includes access to all content and features, as well as administrative tools and capabilities. This tier is intended for users who want to have the most comprehensive experience on the platform and support its ongoing development and maintenance. Users in this tier will also have the ability to create and manage their own servers, as well as access to exclusive content and features that are not available to users in the Free or Premium tiers. This tier is designed for users who are highly engaged with the platform and want to have the most comprehensive experience possible. They will have access to the insider community and be able to provide feedback and suggestions directly to the development team, as well as receive early access to new features and updates. This tier is intended for users who are passionate about the platform and want to support its growth and success in a meaningful way.
+### Demo Access
+- Content owners can mark individual Pages or features as **demoable**.
+- Any user can request demo access to a demoable item; the server owner approves or denies the request.
+- Approval grants a time-limited access window configured by the server owner (duration, scope).
+- Demo sessions are logged and count toward the server's audit trail.
+- When a demo period expires, the user's access automatically reverts to their standard visibility level.
+- The Super Owner can review and revoke demo access across any server if required.
 
-*Note: `superowner` does not belong to any tier and will have highest level of access*
+## Access Tiers
+There are 3 access tiers on the platform:
+
+| Tier | How to Get It | Key Capabilities |
+|---|---|---|
+| **Free** | Default on registration | Public content, profile, follow users & servers |
+| **Premium** | One-time Server purchase | Own Server, invite members, configure subscriptions |
+| **Loyalist** | Recurring platform subscription | All Free + Premium benefits, enhanced profile, insider access |
+
+### Free
+- Default tier for all registered users.
+- Access to all `public` content and the Limbo server.
+- Can create and manage a profile, follow users and servers, and interact with public content.
+- Can be invited as a member of a Premium server and access its content based on visibility settings.
+
+### Premium
+- Unlocked by paying a one-time Server creation fee.
+- Can create and own a Server, configure pages, set visibility rules, and offer server subscriptions.
+- Can invite Free-tier users as server members, allowing them to benefit from the Server's features within the visibility constraints.
+
+### Loyalist
+- Active recurring platform subscription.
+- Includes all Free and Premium capabilities.
+- Access to enhanced profile features (animated media, special effects, custom overlays).
+- Insider community access — early feature previews, direct feedback channel to the development team.
+- Exclusive platform-wide content and features not available to Free or Premium tiers.
+
+*Note: `superowner` does not belong to any tier and has the highest level of access across the entire platform.*
