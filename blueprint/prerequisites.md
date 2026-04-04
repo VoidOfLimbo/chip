@@ -149,7 +149,7 @@ Must be complete before any payment or subscription feature is built.
 | 5.1 | `ServerMember` query service | Resolves a user's role on a given Server from `server_members` |
 | 5.2 | `EnsureServerMember` middleware | Aborts 403 if user is not an active member (`status = active`) of the route-bound Server. **Not applied to feature routes** (to allow preview users with auto-demo access) or content-serving routes (handled by `PagePolicy`) |
 | 5.3 | `EnsureServerRole` middleware | Parametric: `->middleware('server.role:moderator')` — aborts 403 if user's server_role is below required level |
-| 5.4 | `ServerPolicy` | `view`, `manage`, `approveJoin`, `inviteMembers`, `suspendMember`, `manageFeatures`, `investCredits`, `configureAccess`, `manageComponents` |
+| 5.4 | `ServerPolicy` | `view`, `manage`, `inviteMembers`, `suspendMember`, `manageFeatures`, `investCredits`, `configureAccess`, `manageComponents` |
 | 5.5 | `PagePolicy` | `view`, `create`, `update`, `publish`, `delete` — visibility checks included |
 | 5.6 | `PageComponentPolicy` | `view`, `update`, `delete`, `hide` — respects `is_locked` |
 | 5.7 | `ModerationPolicy` | `moderate`, `extendPreview`, `manageGroupMembers` |

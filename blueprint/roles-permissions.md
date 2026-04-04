@@ -1,4 +1,4 @@
-# Roles, Permissions & Abilities
+# Roles, Permissions & Features
 
 ## Overview
 Authorization has two distinct layers:
@@ -164,7 +164,7 @@ All authorization is enforced **server-side only**. Frontend UI guards (hidden b
 
 | Policy | Resource | Key methods |
 |---|---|---|
-| `ServerPolicy` | `Server` | `view`, `manage`, `approveJoin`, `inviteMembers`, `suspendMember`, `manageFeatures`, `investCredits`, `configureAccess`, `manageComponents` |
+| `ServerPolicy` | `Server` | `view`, `manage`, `inviteMembers`, `suspendMember`, `manageFeatures`, `investCredits`, `configureAccess`, `manageComponents` |
 | `PagePolicy` | `Page` | `view`, `create`, `update`, `publish`, `delete` |
 | `PageComponentPolicy` | `PageComponent` | `view`, `update`, `delete`, `hide` |
 | `ModerationPolicy` | `Server` | `moderate`, `extendPreview`, `manageGroupMembers` |
@@ -172,12 +172,11 @@ All authorization is enforced **server-side only**. Frontend UI guards (hidden b
 - Policies live in `app/Policies/`. Registered automatically by Laravel's convention.
 - Every controller action calls `$this->authorize()` or `Gate::authorize()` — even if middleware already passed.
 - The `super_owner` check is in `Gate::before()` in `AppServiceProvider` — it short-circuits all policy checks unconditionally.
-- `ServerPolicy@approveJoin` checks `server_role === server_owner` explicitly — no moderator can pass this check.
 
 ### Why Both Layers?
 
 - **Middleware** prevents unauthenticated / non-member requests from hitting business logic entirely.
-- **Policies** enforce role-level granularity inside valid requests — e.g. a moderator hitting an `approveJoin` action still gets `403` even though they passed `EnsureServerMember`.
+- **Policies** enforce role-level granularity inside valid requests — e.g. a moderator hitting a `manageFeatures` action still gets `403` even though they passed `EnsureServerMember`.
 - Together they make it impossible to exploit the frontend (e.g. manually calling a route the UI hides) or to escalate permissions through crafted requests.
 
 ### Feature Access Rule Resolution (Most-Specific-Wins)

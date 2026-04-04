@@ -341,7 +341,7 @@ Rules:
 | `payment_intent.succeeded` | Investor upgrade OR boost OR donation processed; insert `payment_consents` row |
 | `customer.subscription.created` | Server feature subscription or Server supporter subscription active |
 | `customer.subscription.updated` | Feature added/removed; sync `server_features` |
-| `customer.subscription.deleted` | Subscription cancelled; schedule access revocation |
+| `customer.subscription.deleted` | Subscription cancelled; schedule access revocation; remove `supporter` server role from user on that Server; trigger moderator demotion check (demote to `member` if user was a `moderator`) |
 | `invoice.payment_succeeded` | Record renewal; insert `payment_consents` row; schedule renewal reminders (7d, 3d, 1d) |
 | `invoice.payment_failed` | Notify user; start 7-day grace period; schedule daily reminders |
 | `invoice.upcoming` | Trigger 7-day renewal warning notification |

@@ -144,8 +144,6 @@ access_logs
 | `token_expired` | Share token accessed after expiry |
 | `token_exhausted` | Share token accessed after `max_uses` reached |
 | `access_denied` | Content access refused (insufficient visibility level) |
-| `join_requested` | User submits a join request to a Server |
-| `join_approved` | Join request approved by Server owner |
 | `invite_accepted` | User accepts an invite |
 | `preview_started` | User begins a time-limited Server preview |
 | `preview_expired` | User's preview window expires |
@@ -200,5 +198,6 @@ Exact paths TBD based on final routing structure (see `blueprint/access-tiers.md
 ## Open Questions
 - Should OTP attempts have a rate limit and lockout policy (e.g. 5 failed attempts → 15 min lockout)?
 - What is the OTP expiry duration (e.g. 10 minutes)?
-- Should access logs have a retention policy (e.g. archived after 12 months, raw logs purged after 24 months)?
 - Should `access_logs` be in a separate database schema or table partition for performance at scale?
+
+> **Resolved:** Access log retention is **12 months** (raw logs deleted after 12 months; anonymisation on GDPR erasure request). Defined in `blueprint/legal.md` Section 11.

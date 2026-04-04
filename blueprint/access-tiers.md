@@ -40,7 +40,7 @@ The Super Owner is **not a tier** — they are the operator of the Chip webapp i
   - Before or after expiry: can request a **1-week extension once per week** — the Server owner or moderator approves or **denies** the request with an optional message. A denial permanently prevents the user from making further **self-service** extension requests on that Server. The server owner can still directly add the denied user as a full member at any time.
 - **Demo feature access**: while in the preview window, any Feature that the platform marks as `demo_accessible` is **automatically available** at reduced limits — no request or approval needed. Features explicitly set to `demo_accessible = false` by the `super_owner` require a manual request: the Server owner approves or **denies** with an optional message. A denial permanently prevents the user from placing further **self-service** demo access requests for that feature on that Server. The server owner can still grant access directly at any time.
 - **Follow** other users (bidirectional with followback — see User Follows below) or Servers.
-- Followers can see Servers owned by people they follow and access content at `followers` visibility or lower.
+- By following a user or Server, followers can access content published at `followers` visibility or lower by that user or on that Server.
 - **Boost a Server** (one-off payment) → gains `supporter` server role on that Server and access to whatever the Server owner grants supporters.
 - **Donate** to a Server creator (any amount, anonymous or public in Hall of Fame).
 - **Subscribe** to any Server for sustained supporter access (see Supporter Subscriptions below).
@@ -114,14 +114,11 @@ The Super Owner is **not a platform tier**. They are the operator of the Chip we
 
 ### What the Super Owner Can Do
 - Everything an Investor can do, with no limits.
-- Configures platform-wide settings: Investor fee amount, feature prices, feature caps, default preview duration.
-- Manages all globally available Features (create, price, activate/deactivate).
+- Configures all platform-wide settings: Investor fee amount, feature prices, Member Slot prices, feature caps, boost tier thresholds, and default preview duration.
+- Manages all globally available Features (create, price, activate/deactivate, set `demo_accessible` and `demo_usage_limits`).
 - No Server creation limit; no monthly cost for any Server they own.
 - Bypasses all Gates and Policies unconditionally — no permission check ever applies.
-- Unlimited Servers at no cost.
-- Define platform-wide Feature prices, Member Slot prices, boost tier thresholds, and all platform config values.
-- Suspend, modify, or manage any user, Server, or content on the platform.
-- Bypass all permission gates — no policy or gate check applies.
+- Can suspend, modify, or manage any user, Server, or content on the platform.
 
 ### Seed Data
 | Field | Value |
